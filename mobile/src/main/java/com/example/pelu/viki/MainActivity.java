@@ -2,11 +2,14 @@ package com.example.pelu.viki;
 
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.os.IBinder;
 import android.widget.MediaController.MediaPlayerControl;
 import android.media.session.MediaController;
 import android.net.Uri;
@@ -38,10 +41,17 @@ import java.util.Locale;
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
-import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
+import edu.cmu.pocketsphinx.SpeechRecognizerSetup;import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import android.net.Uri;
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.widget.ListView;
 
 
-public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsphinx.RecognitionListener, TextToSpeech.OnInitListener {
+
+public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsphinx.RecognitionListener, TextToSpeech.OnInitListener, MediaPlayerControl {
 
 
     private SpeechRecognizer recognizer;
@@ -53,6 +63,34 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     private TextToSpeech textToSpeech;
     private MediaPlayer mediaPlayer;
     ArrayList<String> listItems = new ArrayList<String>();
+
+    /*
+    variable de instancia mediacontroller para el control de las canciones
+     */
+    private MusicController controller;
+
+    /*
+    Para la lista de canciones.. esto es un aprueba
+   */
+
+    private ArrayList<Song> songList;
+
+
+
+    //service
+    private MusicService musicSrv;
+    private Intent playIntent;
+    //binding
+    private boolean musicBound=false;
+
+
+    //activity and playback pause flags
+    private boolean paused=false, playbackPaused=false;
+
+
+                    /*
+    Fin de las variables de prueba
+                    */
 
     //debemos almacenar para mostrar en la lista, el nombre de la play list que esté en la config de usuario
     //TODO: los datos mejor en base de datos ¿?? //
@@ -67,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     Button playlist, canciones,album, artista;
     TableLayout spotifyTabla;
     MenuItem MusicaPlay, MusicaNext, MusicaStop;
+    View PanelMusica;
 
 
 
@@ -96,6 +135,11 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         super.onCreate(state);
         setContentView(R.layout.activity_main);
 
+        /*
+        Prueba lista canciones
+         */
+
+        songList = new ArrayList<Song>();
 
         MusicaNext = (MenuItem) findViewById(R.id.action_shuffle);
         MusicaStop = (MenuItem) findViewById(R.id.action_end);
@@ -105,6 +149,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         album = (Button) findViewById(R.id.button10);
         artista = (Button) findViewById(R.id.button9);
         spotifyTabla = (TableLayout) findViewById(R.id.TablaSpoty);
+        PanelMusica = (View) findViewById(R.id.view);
 
 
         listaDispo.setBackgroundColor(255);
@@ -113,9 +158,27 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         textToSpeech = new TextToSpeech(this, this);
        // new MyAsynk().execute();
         runRecognizerSetup();
+        getSongList();
+        /*
+        Oredna las cancions alfabéticamente
+         */
+        Collections.sort(songList, new Comparator<Song>(){
+            public int compare(Song a, Song b){
+                return a.getTitle().compareTo(b.getTitle());
+            }
+        });
 
+        /*
+        nueva instancia adapter de las cancioonesy las asociamos a la lista
+         */
 
+        SongAdapter songAdt = new SongAdapter(this, songList);
+        listaDispo.setAdapter(songAdt);
 
+        /*
+        Aplicams al vista del control de conciones
+         */
+        setController();
 
 
         final Button button = findViewById(R.id.button);
@@ -162,6 +225,100 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
 
     }
+
+
+    //connect to the service
+    private ServiceConnection musicConnection = new ServiceConnection(){
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+
+            MusicService.MusicBinder binder = (MusicService.MusicBinder)service;
+            //get service
+            musicSrv = binder.getService();
+            //pass list
+            musicSrv.setList(songList);
+
+            musicBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            musicBound = false;
+        }
+    };
+
+
+    //start and bind the service when the activity starts
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(playIntent==null){
+            playIntent = new Intent(this, MusicService.class);
+            bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
+            startService(playIntent);
+        }
+    }
+
+
+    //user song select
+    public void songPicked(View view){
+        musicSrv.setSong(Integer.parseInt(view.getTag().toString()));
+        musicSrv.playSong();
+        if(playbackPaused){
+            setController();
+            playbackPaused=false;
+        }
+        controller.show(0);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //menu item selected
+        switch (item.getItemId()) {
+            case R.id.action_shuffle:
+                musicSrv.setShuffle();
+                break;
+            case R.id.action_end:
+                stopService(playIntent);
+                musicSrv=null;
+                System.exit(0);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    /*
+    Obtencion de los datos de las canciones
+     */
+
+    public void getSongList() {
+
+        ContentResolver musicResolver = getContentResolver();
+        Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
+
+        if(musicCursor!=null && musicCursor.moveToFirst()){
+            //get columns
+            int titleColumn = musicCursor.getColumnIndex
+                    (android.provider.MediaStore.Audio.Media.TITLE);
+            int idColumn = musicCursor.getColumnIndex
+                    (android.provider.MediaStore.Audio.Media._ID);
+            int artistColumn = musicCursor.getColumnIndex
+                    (android.provider.MediaStore.Audio.Media.ARTIST);
+            //add songs to list
+            do {
+                long thisId = musicCursor.getLong(idColumn);
+                String thisTitle = musicCursor.getString(titleColumn);
+                String thisArtist = musicCursor.getString(artistColumn);
+                songList.add(new Song(thisId, thisTitle, thisArtist));
+            }
+            while (musicCursor.moveToNext());
+        }
+
+    }
+
 
                                         /*
 Llamada al archivo xml que contien el menu... si no dará error
@@ -360,19 +517,6 @@ Llamada al archivo xml que contien el menu... si no dará error
                         e.printStackTrace();
                     }
                     mediaPlayer.start();
-
-
-
-
-                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                   @Override
-                   public void onCompletion(MediaPlayer mp) {
-
-
-
-                   }
-                   });
-
                     recognizer.stop();
                     recognizer.startListening(MENU_SEARCH);
                 }catch (Exception e){
@@ -400,22 +544,6 @@ Llamada al archivo xml que contien el menu... si no dará error
                     e.printStackTrace();
                 }
                 mediaPlayer.start();
-
-                                            /*
-                TODO: REVISAR METODO PARA SEGUIR LA SIGUIENTE CANCION AUTOMATICAMENTE
-
-                                             */
-
-                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-
-
-
-
-                    }
-                });
-
                 recognizer.stop();
                 recognizer.startListening(MENU_SEARCH);
 
@@ -499,8 +627,21 @@ Llamada al archivo xml que contien el menu... si no dará error
 @Override
 protected void onPause() {
    super.onPause();
+    paused=true;
 
 }
+
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        if(paused){
+            setController();
+            paused=false;
+        }
+    }
+
+
 
 public void apagarViki() {
    textToSpeech.speak("apagando", TextToSpeech.QUEUE_FLUSH, null, null);
@@ -865,6 +1006,10 @@ ENCENDIDO REMOTO
 
     }
 
+    /*
+    todo: metodos de control de lista de reproduccion
+     */
+
     @Override
     public void onInit(int status) {
 
@@ -872,6 +1017,7 @@ ENCENDIDO REMOTO
 
     @Override
     public void onStop() {
+        controller.hide();
         super.onStop();
 
         /*
@@ -881,5 +1027,118 @@ ENCENDIDO REMOTO
         }
         */
     }
+
+    @Override
+    public void start() {
+        musicSrv.go();
+    }
+
+    @Override
+    public void pause() {
+        playbackPaused=true;
+        musicSrv.pausePlayer();
+    }
+
+    @Override
+    public int getDuration() {
+        if(musicSrv!=null && musicBound && musicSrv.isPng())
+            return musicSrv.getDur();
+        else return 0;
+    }
+
+    @Override
+    public int getCurrentPosition() {
+        if(musicSrv!=null && musicBound && musicSrv.isPng())
+            return musicSrv.getPosn();
+        else return 0;
+    }
+
+    @Override
+    public void seekTo(int pos) {
+        musicSrv.seek(pos);
+    }
+
+    @Override
+    public boolean isPlaying() {
+        if(musicSrv!=null && musicBound)
+        return musicSrv.isPng();
+        return false;
+    }
+
+    @Override
+    public int getBufferPercentage() {
+        return 0;
+    }
+
+    @Override
+    public boolean canPause() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekBackward() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekForward() {
+        return true;
+    }
+
+    @Override
+    public int getAudioSessionId() {
+        return 0;
+    }
+
+       /*
+       Aplicacion del controlador de canciones
+        */
+    private void setController(){
+
+        controller = new MusicController(this);
+
+            //todo: acciones de los botones del controlador
+        controller.setPrevNextListeners(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playNext();
+            }
+        }, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playPrev();
+            }
+        });
+
+        /*
+        Aplicamos y asociamos el control a la lista de canciones
+         */
+        controller.setMediaPlayer(this);
+        controller.setAnchorView(findViewById(R.id.view));
+        controller.setEnabled(true);
+    }
+
+
+    //play next
+    private void playNext(){
+        musicSrv.playNext();
+        if(playbackPaused){
+            setController();
+            playbackPaused=false;
+        }
+        controller.show(0);
+    }
+
+    //play previous
+    private void playPrev(){
+        musicSrv.playPrev();
+        if(playbackPaused){
+            setController();
+            playbackPaused=false;
+        }
+        controller.show(0);
+    }
+
+
 
 }

@@ -10,8 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/FONDO"
-        tools:layout_editor_absoluteX="120dp"
-        tools:layout_editor_absoluteY="230dp">
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="416dp">
 
 
         <TextView
@@ -85,6 +85,7 @@
 
         </TableLayout>
 
+
         <ListView
             android:id="@+id/lista"
             android:layout_width="match_parent"
@@ -99,8 +100,6 @@
         </ListView>
 
 
-
-
         <Button
             android:id="@+id/button"
             style="@android:style/Widget.Material.Button.Colored"
@@ -113,6 +112,11 @@
             tools:layout_editor_absoluteX="210dp"
             tools:layout_editor_absoluteY="0dp" />
 
+        <View
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_alignBottom="@+id/button" />
 
 
     </RelativeLayout>
