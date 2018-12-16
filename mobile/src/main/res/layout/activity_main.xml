@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/FONDO"
+        tools:layout_editor_absoluteX="120dp"
+        tools:layout_editor_absoluteY="230dp">
+
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="291dp"
+            android:layout_height="32dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="21dp"
+            android:background="@color/common_google_signin_btn_text_dark_focused"
+            android:text="INICIO"
+            android:textAlignment="center"
+            android:textColor="@color/common_google_signin_btn_text_dark_default"
+            tools:layout_editor_absoluteX="6dp"
+            tools:layout_editor_absoluteY="5dp" />
+
+        <TableLayout
+            android:id="@+id/TablaSpoty"
+            android:layout_width="311dp"
+            android:layout_height="314dp"
+            android:layout_centerInParent="true"
+            tools:layout_editor_absoluteX="45dp"
+            tools:layout_editor_absoluteY="121dp"
+
+
+            >
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/button8"
+                    android:layout_width="154dp"
+                    android:layout_height="match_parent"
+                    android:backgroundTint="@color/BackgroundList"
+                    android:text="Play List"
+                    android:textColor="@color/common_google_signin_btn_text_dark_default" />
+
+                <Button
+                    android:id="@+id/button7"
+                    android:layout_width="154dp"
+                    android:layout_height="155dp"
+                    android:backgroundTint="@color/BackgroundList"
+                    android:text="Canciones"
+                    android:textColor="@color/common_google_signin_btn_text_dark_default" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="81dp">
+
+                <Button
+                    android:id="@+id/button10"
+                    android:layout_width="154dp"
+                    android:layout_height="155dp"
+                    android:backgroundTint="@color/BackgroundList"
+                    android:text="Álbumes"
+                    android:textColor="@color/common_google_signin_btn_text_dark_default" />
+
+                <Button
+                    android:id="@+id/button9"
+                    android:layout_width="154dp"
+                    android:layout_height="match_parent"
+                    android:backgroundTint="@color/BackgroundList"
+                    android:text="Artistas"
+                    android:textColor="@color/common_google_signin_btn_text_dark_default" />
+            </TableRow>
+
+        </TableLayout>
+
+        <ListView
+            android:id="@+id/lista"
+            android:layout_width="match_parent"
+            android:layout_height="334dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="72dp"
+            android:background="#973b89c7"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="161dp">
+
+
+        </ListView>
+
+
+
+
+        <Button
+            android:id="@+id/button"
+            style="@android:style/Widget.Material.Button.Colored"
+            android:layout_width="84dp"
+            android:layout_height="79dp"
+            android:layout_below="@+id/TablaSpoty"
+            android:layout_centerHorizontal="true"
+            android:background="@color/BckgroundColor"
+            android:text="Encendido remoto"
+            tools:layout_editor_absoluteX="210dp"
+            tools:layout_editor_absoluteY="0dp" />
+
+
+
+    </RelativeLayout>
+
+
+
+</android.support.constraint.ConstraintLayout>

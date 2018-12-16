@@ -1,0 +1,2 @@
+include ':mobile', ':wear', ':things', ':mail'
+include ':app', ':pocketsphinx-android-5prealpha-release'
