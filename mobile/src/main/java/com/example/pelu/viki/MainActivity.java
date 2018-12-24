@@ -10,18 +10,18 @@ import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.IBinder;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.MediaController.MediaPlayerControl;
-import android.media.session.MediaController;
 import android.net.Uri;
 import android.os.AsyncTask;
+
 import java.util.ArrayList;
-import android.os.Environment;
+
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.speech.tts.TextToSpeech;
@@ -41,14 +41,13 @@ import java.util.Locale;
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
-import edu.cmu.pocketsphinx.SpeechRecognizerSetup;import java.util.ArrayList;
+import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
+
 import java.util.Collections;
 import java.util.Comparator;
-import android.net.Uri;
+
 import android.content.ContentResolver;
 import android.database.Cursor;
-import android.widget.ListView;
-
 
 
 public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsphinx.RecognitionListener, TextToSpeech.OnInitListener, MediaPlayerControl {
@@ -68,13 +67,8 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     variable de instancia mediacontroller para el control de las canciones
      */
     private MusicController controller;
-
-    /*
-    Para la lista de canciones.. esto es un aprueba
-   */
-
     private ArrayList<Song> songList;
-
+    private ArrayList<Song> Dance;
 
 
     //service
@@ -83,14 +77,10 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     //binding
     private boolean musicBound=false;
 
-
     //activity and playback pause flags
     private boolean paused=false, playbackPaused=false;
 
 
-                    /*
-    Fin de las variables de prueba
-                    */
 
     //debemos almacenar para mostrar en la lista, el nombre de la play list que esté en la config de usuario
     //TODO: los datos mejor en base de datos ¿?? //
@@ -108,14 +98,12 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     View PanelMusica;
 
 
-
     private boolean dance = false;
     private boolean spoty_playLists = false;
     private boolean Spotypanel = false;
     private boolean listaRepord =  false;
     private boolean albumes =  false;
     private boolean artistas =  false;
-
 
 
     MailJob mail;
@@ -135,11 +123,12 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         super.onCreate(state);
         setContentView(R.layout.activity_main);
 
-        /*
-        Prueba lista canciones
-         */
 
+                /*
+         lista canciones
+                */
         songList = new ArrayList<Song>();
+        Dance = new ArrayList<Song>();
 
         MusicaNext = (MenuItem) findViewById(R.id.action_shuffle);
         MusicaStop = (MenuItem) findViewById(R.id.action_end);
@@ -153,33 +142,20 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
 
         listaDispo.setBackgroundColor(255);
+        listaDispo.setVisibility(View.VISIBLE);
+
         spotifyTabla.setVisibility(View.INVISIBLE);
 
         textToSpeech = new TextToSpeech(this, this);
+
        // new MyAsynk().execute();
         runRecognizerSetup();
-        getSongList();
-        /*
-        Oredna las cancions alfabéticamente
-         */
-        Collections.sort(songList, new Comparator<Song>(){
-            public int compare(Song a, Song b){
-                return a.getTitle().compareTo(b.getTitle());
-            }
-        });
 
-        /*
-        nueva instancia adapter de las cancioonesy las asociamos a la lista
-         */
-
-        SongAdapter songAdt = new SongAdapter(this, songList);
-        listaDispo.setAdapter(songAdt);
-
-        /*
-        Aplicams al vista del control de conciones
-         */
-        setController();
-
+        //creaMusica();
+        listaDispo.setVisibility(View.INVISIBLE);
+                                    /*
+        Prueba de acciones del boton-- whatsapp y encendido remoto
+                                    */
 
         final Button button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
@@ -200,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
                 }).start();
 
                 creaMusica();
-                openWhatsApp(v);
+                //openWhatsApp(v);
 
             }
                    /*
@@ -252,12 +228,15 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     //start and bind the service when the activity starts
     @Override
     protected void onStart() {
+
         super.onStart();
+
         if(playIntent==null){
             playIntent = new Intent(this, MusicService.class);
             bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
             startService(playIntent);
         }
+
     }
 
 
@@ -293,10 +272,11 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     Obtencion de los datos de las canciones
      */
 
-    public void getSongList() {
+    public void getSongList(Uri direccion, ArrayList<Song> arraycanciones) {
 
+        arraycanciones.clear();
         ContentResolver musicResolver = getContentResolver();
-        Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        Uri musicUri = direccion;
         Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
 
         if(musicCursor!=null && musicCursor.moveToFirst()){
@@ -312,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
                 long thisId = musicCursor.getLong(idColumn);
                 String thisTitle = musicCursor.getString(titleColumn);
                 String thisArtist = musicCursor.getString(artistColumn);
-                songList.add(new Song(thisId, thisTitle, thisArtist));
+                arraycanciones.add(new Song(thisId, thisTitle, thisArtist));
             }
             while (musicCursor.moveToNext());
         }
@@ -321,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
 
                                         /*
-Llamada al archivo xml que contien el menu... si no dará error
+Llamada al archivo xml que contien el menu.superior.. si no dará error
                                         */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -379,250 +359,109 @@ Llamada al archivo xml que contien el menu... si no dará error
 
     public void creaMusica() {
 
-
-        final String Cancion;
-        listaDispo.setBackgroundColor(colorFondoLista);
-
-
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems) {
-
-
-            /*
-    ESTILO TEXTVIEW DE LA LISTA
-            */
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-
-
-                View view = super.getView(position, convertView, parent);
-
-                TextView ListItemShow = (TextView) view.findViewById(android.R.id.text1);
-
-                ListItemShow.setTextColor(Color.parseColor("#FFFFFF"));
-
-
-                return view;
+       // todo: crear uno por cada carpeta o directorio que queramos reproducir pasandolo como
+       // todo: parámetro. O sacar todas las carpetas.
+        /*
+        Oredna las cancions alfabéticamente
+         */
+        Collections.sort(songList, new Comparator<Song>(){
+            public int compare(Song a, Song b){
+                return a.getTitle().compareTo(b.getTitle());
             }
-        };
+        });
+
+        /*
+        nueva instancia adapter de las cancioonesy las asociamos a la lista
+
+         */
+
+
+
+        SongAdapter songAdt = new SongAdapter(this, songList);
+        listaDispo.setAdapter(songAdt);
+
+
+        /*
+        Aplicams al vista del control de conciones
+         */
+        setController();
 
 
         if (dance == true && spoty_playLists == false) {
 
-            try{
-                File f = new File(Environment.getExternalStorageDirectory() + "/Music/dance");
-                File[] files = f.listFiles();
-                adapter.clear();
-
-                for (int i = 0; i < files.length; i++)
-
-                {
-                    //Sacamos del array files un fichero
-                    File file = files[i];
-
-                    //Si es directorio...
-                    if (file.isDirectory())
-
-                        adapter.add(file.getName() + "/");
-
-                        //Si es fichero...
-                    else
-
-                        adapter.add(file.getName());
-                }
-            }catch (Exception e){
-
-                showAlert();
-            }
-
-        } else if (dance == false && spoty_playLists == false) {
-
-            try{
-                File f = new File(Environment.getExternalStorageDirectory() + "/Music/");
-                File[] files = f.listFiles();
-                adapter.clear();
-
-                for (int i = 0; i < files.length; i++)
-
-                {
-                    //Sacamos del array files un fichero
-                    File file = files[i];
-
-                    //Si es directorio...
-                    if (file.isDirectory()){
-
-                    }
-
-                    // adapter.add(file.getName() + "/"); //todo: añade al array los directorios (carpetas).--
-
-                    //Si es fichero...
-                    else
-
-                        adapter.add(file.getName());
-                }
-            }catch (Exception e ){
-
-                showAlert();
-            }
+            getSongList(android.provider.MediaStore.Audio.Media.getContentUriForPath("/storage/emulated/0/Music/"),songList);
 
         }
 
-        //todo: preparando para mostrar la lista de playlist de spotify
+        else if (dance == false && spoty_playLists == false) {
+
+
+            getSongList(android.provider.MediaStore.Audio.Media.getContentUriForPath("/storage/emulated/0/Music/"),songList);
+        }
+
+
 
         else if(spoty_playLists == true){
 
-            try{
+            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems) {
+
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
 
 
-                adapter.clear();
-                for(int i = 0; i<Playlist.length; i++){
+                    View view = super.getView(position, convertView, parent);
 
-                    adapter.add(tituloPlayList[i].toString());
-                    adapter.add(Playlist[i].toString());
+                    TextView ListItemShow = (TextView) view.findViewById(android.R.id.text1);
+
+                    ListItemShow.setTextColor(Color.parseColor("#FFFFFF"));
 
 
+                    return view;
                 }
-                spotifyTabla.setVisibility(View.INVISIBLE);
-            }catch (Exception e){
-
-                showAlert();
-            }
-
-        }
+            };
+                 try{
 
 
-        listaDispo.setAdapter(adapter);
-        listaDispo.setVisibility(View.VISIBLE); //hace invisible o visible la lista //
-        final String PATH_TO_FILE = "/sdcard/Music/";
-        int tamanioAdapter =  adapter.getCount(); // tamaño del array de canciones //
+                    adapter.clear();
+                    for(int i = 0; i<Playlist.length; i++){
 
-        //todo: código duplicado-- REVISAR -- PARA DEPURACIÓN --
-        if(dance == true && spoty_playLists == false){
-
-                try{
-
-                    Cancion =PATH_TO_FILE +"dance/" + adapter.getItem(0);
-                    System.out.println(Cancion);
-
-                    mediaPlayer = new MediaPlayer();
+                        adapter.add(tituloPlayList[i].toString());
+                        adapter.add(Playlist[i].toString());
 
 
-                    try {
-                        mediaPlayer.setDataSource(Cancion);
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
-                    try {
-                        mediaPlayer.prepare();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    mediaPlayer.start();
-                    recognizer.stop();
-                    recognizer.startListening(MENU_SEARCH);
+                    spotifyTabla.setVisibility(View.INVISIBLE);
                 }catch (Exception e){
 
-                    showAlert();
+                    // showAlert();
                 }
 
+            listaDispo.setAdapter(adapter);
 
-        }
-        else if(dance == false && spoty_playLists == false){
+            // Accion para realizar al pulsar sobre un item de la lista
+            listaDispo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-            try{
-                Cancion =PATH_TO_FILE + adapter.getItem(0);
-                System.out.println(Cancion);
 
-                mediaPlayer = new MediaPlayer();
-                try {
-                    mediaPlayer.setDataSource(Cancion);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                    System.out.println(adapter.getItem(i));
+
+                    if (spoty_playLists == true) {
+
+                        abrespoty(adapter.getItem(i));
+                    }
                 }
-                try {
-                    mediaPlayer.prepare();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                mediaPlayer.start();
-                recognizer.stop();
-                recognizer.startListening(MENU_SEARCH);
+            });
 
-            }catch (Exception e){
-
-                showAlert();
             }
 
-        }
+            listaDispo.setVisibility(View.VISIBLE);
 
-        // Accion para realizar al pulsar sobre un item de la lista
-        listaDispo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            recognizer.stop();
+            recognizer.startListening(MENU_SEARCH);
 
-
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                System.out.println(adapter.getItem(i));
-
-                if(spoty_playLists == true){
-
-                    abrespoty(adapter.getItem(i));
-                }
-
-
-          else if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-
-               mediaPlayer.stop();
-               mediaPlayer.release();
-               mediaPlayer = null;
-           }
-
-           //Devolvemos el resultado de la selección
-           Intent data = new Intent();
-           data.putExtra("filename", adapter.getItemId(i));
-           setResult(RESULT_OK, data);
-           System.out.println(adapter.getItem(i));
-
-           mediaPlayer = new MediaPlayer();
-
-           //todo: la ruta depende de la carpeta donde nos encontremos ---REVISAR---
-
-
-
-           try {
-               if(dance == true && Spotypanel == false){
-                   String PATH_TO_FILE = "/sdcard/Music/dance/" + adapter.getItem(i);
-                   mediaPlayer.setDataSource(PATH_TO_FILE);
-               }
-
-               else if(dance == false && Spotypanel == false){
-
-               }String PATH_TO_FILE = "/sdcard/Music/" + adapter.getItem(i);
-               mediaPlayer.setDataSource(PATH_TO_FILE);
-
-
-           } catch (IOException e) {
-               e.printStackTrace();
-           }
-           try {
-               if(Spotypanel == false){
-
-                   //TODO: DA ERROR PORQUE USAMOS LA MISMA LISTA PARA TODA LA MUSICA // REVISAR  //
-                   mediaPlayer.prepare();
-
-               }
-
-           } catch (IOException e) {
-               e.printStackTrace();
-           }
-
-           mediaPlayer.start();
-           recognizer.stop();
-           recognizer.startListening(MENU_SEARCH);
-
-       }
-   });
-
-}
+    }
 
 @Override
 protected void onPause() {

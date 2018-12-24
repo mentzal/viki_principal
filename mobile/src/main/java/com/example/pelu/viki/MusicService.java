@@ -71,7 +71,7 @@ public class MusicService extends Service implements
         String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
         String channelName = "My Background Service";
         NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
-        chan.setLightColor(Color.BLUE);
+        chan.setLightColor(Color.GREEN);
         chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         assert manager != null;
