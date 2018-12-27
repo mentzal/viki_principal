@@ -172,8 +172,11 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
                                                                 /*
         todo: llamamos a metodos de prueba, como inicir el repriductor, cambiar de activity para dictar y enviar por whatsupp
                                                                 */
-                creaMusica();
-                recognizer.stop();
+               // creaMusica();
+               // recognizer.stop();
+                Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
+                startActivity(telefonos);
+
             }
 
         });
@@ -673,8 +676,8 @@ public void onPartialResult(Hypothesis hypothesis) {
             } else if (hypothesis.getHypstr().equals("abre whatsapp")) {
 
 
-                Intent dictado = new Intent(getApplicationContext(), Dictado.class);
-                startActivity(dictado);
+                Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
+                startActivity(telefonos);
 
 
                 recognizer.stop();
