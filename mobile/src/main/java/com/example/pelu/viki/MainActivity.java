@@ -1,6 +1,5 @@
 package com.example.pelu.viki;
 
-
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -15,9 +14,7 @@ import android.widget.AdapterView;
 import android.widget.MediaController.MediaPlayerControl;
 import android.net.Uri;
 import android.os.AsyncTask;
-
 import java.util.ArrayList;
-
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
@@ -42,10 +39,8 @@ import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
-
 import java.util.Collections;
 import java.util.Comparator;
-
 import android.content.ContentResolver;
 import android.database.Cursor;
 
@@ -148,15 +143,14 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
         textToSpeech = new TextToSpeech(this, this);
 
-       // new MyAsynk().execute();
         runRecognizerSetup();
 
-        //creaMusica();
         listaDispo.setVisibility(View.INVISIBLE);
+
+
                                     /*
         Prueba de acciones del boton-- whatsapp y encendido remoto
                                     */
-
         final Button button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -175,33 +169,16 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
                     }
                 }).start();
 
+                                                                /*
+        todo: llamamos a metodos de prueba, como inicir el repriductor, cambiar de activity para dictar y enviar por whatsupp
+                                                                */
                 creaMusica();
-                //openWhatsApp(v);
-
+                recognizer.stop();
             }
-                   /*
-            Abre whatsapp y envía mensaje al numero indicado
-                                 */
-            public void openWhatsApp(View view){
-                try {
-                    String text = "This is a test";// Replace with your message.
 
-                    String toNumber = "34680701211"; // Replace with mobile phone number without +Sign or leading zeros.
-
-
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse("http://api.whatsapp.com/send?phone="+toNumber +"&text="+text));
-                    startActivity(intent);
-                }
-                catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
         });
 
-
     }
-
 
     //connect to the service
     private ServiceConnection musicConnection = new ServiceConnection(){
@@ -244,6 +221,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     public void songPicked(View view){
         musicSrv.setSong(Integer.parseInt(view.getTag().toString()));
         musicSrv.playSong();
+        recognizer.stop();
         if(playbackPaused){
             setController();
             playbackPaused=false;
@@ -370,33 +348,30 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
             }
         });
 
-        /*
+                                    /*
         nueva instancia adapter de las cancioonesy las asociamos a la lista
 
-         */
-
-
+                                    */
 
         SongAdapter songAdt = new SongAdapter(this, songList);
         listaDispo.setAdapter(songAdt);
 
-
-        /*
+                            /*
         Aplicams al vista del control de conciones
-         */
+                             */
         setController();
 
 
         if (dance == true && spoty_playLists == false) {
 
-            getSongList(android.provider.MediaStore.Audio.Media.getContentUriForPath("/storage/emulated/0/Music/"),songList);
+            getSongList(android.provider.MediaStore.Audio.Media.getContentUriForPath("/storage/emulated/0/Music"),songList);
 
         }
 
         else if (dance == false && spoty_playLists == false) {
 
 
-            getSongList(android.provider.MediaStore.Audio.Media.getContentUriForPath("/storage/emulated/0/Music/"),songList);
+            getSongList(android.provider.MediaStore.Audio.Media.getContentUriForPath("/storage/emulated/0/Music"),songList);
         }
 
 
@@ -604,10 +579,10 @@ public void onPartialResult(Hypothesis hypothesis) {
    }
 
 }
+                                    /*
+                            ENCENDIDO REMOTO
+                                    */
 
-/*
-ENCENDIDO REMOTO
-*/
     private static byte[] getMacBytes(String mac) throws IllegalArgumentException {
         Log.d("GetMacBytes", "method started");
 // TODO Auto-generated method stub
@@ -686,6 +661,7 @@ ENCENDIDO REMOTO
 
                 recognizer.stop();
                 recognizer.startListening(MENU_SEARCH);
+                /*
             } else if (hypothesis.getHypstr().equals("abre navegador")) {
                 // abre el navegador chorme //
                 open(MainActivity.this, "http://www.google.com");
@@ -693,17 +669,16 @@ ENCENDIDO REMOTO
 
                 recognizer.stop();
                 recognizer.startListening(MENU_SEARCH);
+                */
             } else if (hypothesis.getHypstr().equals("abre whatsapp")) {
 
 
-                textToSpeech.speak("abriendo whatsapp", TextToSpeech.QUEUE_FLUSH, null, null);
-                Context ctx = MainActivity.this; // or you can replace **'this'** with your **ActivityName.this**
-                Intent i = ctx.getPackageManager().getLaunchIntentForPackage("com.whatsapp");
-                ctx.startActivity(i);
+                Intent dictado = new Intent(getApplicationContext(), Dictado.class);
+                startActivity(dictado);
 
 
                 recognizer.stop();
-                recognizer.startListening(MENU_SEARCH);
+               // recognizer.startListening(MENU_SEARCH);
 
             } else if (hypothesis.getHypstr().equals("abre spotify")) {
 
@@ -740,24 +715,14 @@ ENCENDIDO REMOTO
                 // musica = true;
                 textToSpeech.speak("reproduciendo", TextToSpeech.QUEUE_FLUSH, null, null);
                 recognizer.stop();
-                recognizer.startListening(MENU_SEARCH);
+
 
 
             }
-                    /*
-              Detiene la reproduccion
-                    */
 
-            else if (hypothesis.getHypstr().equals("para música")) {
-
-                mediaPlayer.stop();
-                recognizer.stop();
-                recognizer.startListening(MENU_SEARCH);
-                //musica=false;
-
-            } else if (hypothesis.getHypstr().equals("cierra música")) {
+             else if (hypothesis.getHypstr().equals("cierra música")) {
                 dance = false;
-                mediaPlayer.stop();
+                controller.hide();
                 recognizer.stop();
                 listaDispo.setVisibility(View.INVISIBLE);
                 recognizer.startListening(MENU_SEARCH);
@@ -856,7 +821,8 @@ ENCENDIDO REMOTO
 
     @Override
     public void onStop() {
-        controller.hide();
+
+        //controller.hide();
         super.onStop();
 
         /*
@@ -870,12 +836,15 @@ ENCENDIDO REMOTO
     @Override
     public void start() {
         musicSrv.go();
+        recognizer.stop();
+
     }
 
     @Override
     public void pause() {
         playbackPaused=true;
         musicSrv.pausePlayer();
+        recognizer.startListening(MENU_SEARCH);
     }
 
     @Override
@@ -900,6 +869,7 @@ ENCENDIDO REMOTO
     @Override
     public boolean isPlaying() {
         if(musicSrv!=null && musicBound)
+
         return musicSrv.isPng();
         return false;
     }
@@ -961,6 +931,7 @@ ENCENDIDO REMOTO
     //play next
     private void playNext(){
         musicSrv.playNext();
+        recognizer.stop();
         if(playbackPaused){
             setController();
             playbackPaused=false;
@@ -970,6 +941,7 @@ ENCENDIDO REMOTO
 
     //play previous
     private void playPrev(){
+        recognizer.stop();
         musicSrv.playPrev();
         if(playbackPaused){
             setController();
@@ -977,7 +949,5 @@ ENCENDIDO REMOTO
         }
         controller.show(0);
     }
-
-
 
 }

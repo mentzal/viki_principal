@@ -3,9 +3,9 @@ package com.example.pelu.viki;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.speech.tts.TextToSpeech;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -29,8 +29,36 @@ public class Dictado extends Activity  {
         setContentView(R.layout.dictado);
 
         grabar = (TextView) findViewById(R.id.txtGrabarVoz);
+
         final ImageButton button = findViewById(R.id.img_btn_hablar);
         final Button volver = findViewById(R.id.button2);
+        final Button enviar = findViewById(R.id.button3);
+        final Button listaTlf = findViewById(R.id.button6);
+
+
+
+
+        listaTlf.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
+                startActivity(telefonos);
+            }
+        });
+
+
+        enviar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                String telefono = getIntent().getStringExtra("phone");
+                openWhatsApp(v, grabar.getText().toString(),telefono);
+
+            }
+        });
+
 
         button.setOnClickListener(new View.OnClickListener() {
 
@@ -43,7 +71,7 @@ public class Dictado extends Activity  {
 
                 // Configura el Lenguaje (Español-México)
                 intentActionRecognizeSpeech.putExtra(
-                        RecognizerIntent.EXTRA_LANGUAGE_MODEL, "es-MX");
+                        RecognizerIntent.EXTRA_LANGUAGE_MODEL, "es-ES");
                 try {
                     startActivityForResult(intentActionRecognizeSpeech,
                             RECOGNIZE_SPEECH_ACTIVITY);
@@ -57,17 +85,24 @@ public class Dictado extends Activity  {
             }
         });
 
-
         volver.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 Intent intent = new Intent();
                 intent.setClass(Dictado.this, MainActivity.class);
-                startActivity(intent);
+                startActivity(intent .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                 finish();
             }
         });
+
+    }
+
+
+    @Override
+    protected void onStop() {
+
+        super.onStop();
 
     }
 
@@ -75,7 +110,6 @@ public class Dictado extends Activity  {
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
 
 
         switch (requestCode) {
@@ -98,26 +132,23 @@ public class Dictado extends Activity  {
         }
     }
 
-
-
-    public void onClickImgBtnHablar(View v) {
-
-        Intent intentActionRecognizeSpeech = new Intent(
-                RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-
-// Configura el Lenguaje (Español-México)
-        intentActionRecognizeSpeech.putExtra(
-                RecognizerIntent.EXTRA_LANGUAGE_MODEL, "es-MX");
+                                /*
+           Abre whatsapp y envía mensaje al numero indicado
+                                */
+    public void openWhatsApp(View view, String texto, String telefono){
         try {
-            startActivityForResult(intentActionRecognizeSpeech,
-                    RECOGNIZE_SPEECH_ACTIVITY);
-        } catch (ActivityNotFoundException a) {
-            Toast.makeText(getApplicationContext(),
-                    "Tú dispositivo no soporta el reconocimiento por voz",
+            String text = texto ;// Replace with your message.
 
-                    Toast.LENGTH_SHORT).show();
+            String toNumber = telefono; // Replace with mobile phone number without +Sign or leading zeros.
+
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("http://api.whatsapp.com/send?phone="+toNumber +"&text="+text));
+            startActivity(intent);
         }
-
+        catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 
