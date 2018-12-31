@@ -157,6 +157,17 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
 
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        Intent principal = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(principal);
+
+        finish();
+
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode,

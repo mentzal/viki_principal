@@ -73,6 +73,18 @@ public class Dictado extends Activity  {
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        Intent principal = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(principal);
+
+        finish();
+
+
+    }
+
+    @Override
     protected void onStop() {
 
         super.onStop();
