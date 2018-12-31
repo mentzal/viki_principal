@@ -172,10 +172,13 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
                                                                 /*
         todo: llamamos a metodos de prueba, como inicir el repriductor, cambiar de activity para dictar y enviar por whatsupp
                                                                 */
-               // creaMusica();
-               // recognizer.stop();
                 Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
                 startActivity(telefonos);
+                recognizer.stop();
+
+
+               // creaMusica();
+               // recognizer.stop();
 
             }
 
@@ -417,7 +420,7 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
             listaDispo.setAdapter(adapter);
 
             // Accion para realizar al pulsar sobre un item de la lista
-            listaDispo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            listaDispo.setOnItemClickListener(  new AdapterView.OnItemClickListener() {
 
 
                 @Override
@@ -678,7 +681,6 @@ public void onPartialResult(Hypothesis hypothesis) {
 
                 Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
                 startActivity(telefonos);
-
 
                 recognizer.stop();
                // recognizer.startListening(MENU_SEARCH);

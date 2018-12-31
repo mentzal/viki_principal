@@ -18,7 +18,7 @@ import edu.cmu.pocketsphinx.Hypothesis;
 
 public class Dictado extends Activity  {
 
-    TextView grabar;
+    TextView grabar,numero;
 
     private static final int RECOGNIZE_SPEECH_ACTIVITY = 1;
 
@@ -28,14 +28,35 @@ public class Dictado extends Activity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dictado);
 
-        grabar = (TextView) findViewById(R.id.txtGrabarVoz);
+        grabar = (TextView) findViewById(R.id.txtGrabarVoz2);
+        numero= (TextView) findViewById(R.id.txtGrabarVoz);
 
-        final ImageButton button = findViewById(R.id.img_btn_hablar);
-        final Button volver = findViewById(R.id.button2);
-        final Button enviar = findViewById(R.id.button3);
+       // final Button button = findViewById(R.id.img_btn_hablar);
+       // final Button volver = findViewById(R.id.button2);
+        //final Button enviar = findViewById(R.id.button3);
         final Button listaTlf = findViewById(R.id.button6);
 
+        if(getIntent().getStringExtra("phone") != "" ||getIntent().getStringExtra("phone")!= null){
 
+            String numero_telefono = getIntent().getStringExtra("phone");
+            numero.setText(numero_telefono);
+        }
+
+        Intent intentActionRecognizeSpeech = new Intent(
+                RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+
+        // Configura el Lenguaje (Español-México)
+        intentActionRecognizeSpeech.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL, "es-ES");
+        try {
+            startActivityForResult(intentActionRecognizeSpeech,
+                    RECOGNIZE_SPEECH_ACTIVITY);
+        } catch (ActivityNotFoundException a) {
+            Toast.makeText(getApplicationContext(),
+                    "Tú dispositivo no soporta el reconocimiento por voz",
+
+                    Toast.LENGTH_SHORT).show();
+        }
 
 
         listaTlf.setOnClickListener(new View.OnClickListener() {
@@ -44,60 +65,12 @@ public class Dictado extends Activity  {
 
                 Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
                 startActivity(telefonos);
-            }
-        });
 
-
-        enviar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-
-                String telefono = getIntent().getStringExtra("phone");
-                openWhatsApp(v, grabar.getText().toString(),telefono);
-
-            }
-        });
-
-
-        button.setOnClickListener(new View.OnClickListener() {
-
-
-            @Override
-            public void onClick(View v) {
-
-                Intent intentActionRecognizeSpeech = new Intent(
-                        RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-
-                // Configura el Lenguaje (Español-México)
-                intentActionRecognizeSpeech.putExtra(
-                        RecognizerIntent.EXTRA_LANGUAGE_MODEL, "es-ES");
-                try {
-                    startActivityForResult(intentActionRecognizeSpeech,
-                            RECOGNIZE_SPEECH_ACTIVITY);
-                } catch (ActivityNotFoundException a) {
-                    Toast.makeText(getApplicationContext(),
-                            "Tú dispositivo no soporta el reconocimiento por voz",
-
-                            Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        });
-
-        volver.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Intent intent = new Intent();
-                intent.setClass(Dictado.this, MainActivity.class);
-                startActivity(intent .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                 finish();
             }
         });
 
     }
-
 
     @Override
     protected void onStop() {
@@ -105,7 +78,6 @@ public class Dictado extends Activity  {
         super.onStop();
 
     }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent data) {
@@ -130,12 +102,15 @@ public class Dictado extends Activity  {
 
                 break;
         }
+
+        String telefono = getIntent().getStringExtra("phone");
+        openWhatsApp(grabar.getText().toString(),telefono);
     }
 
                                 /*
            Abre whatsapp y envía mensaje al numero indicado
                                 */
-    public void openWhatsApp(View view, String texto, String telefono){
+    public void openWhatsApp(String texto, String telefono){
         try {
             String text = texto ;// Replace with your message.
 
@@ -150,6 +125,5 @@ public class Dictado extends Activity  {
             e.printStackTrace();
         }
     }
-
 
 }
