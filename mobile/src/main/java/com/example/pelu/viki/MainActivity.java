@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
                 Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
                 startActivity(telefonos);
                 recognizer.stop();
-
+                finish();
 
                // creaMusica();
                // recognizer.stop();
@@ -678,11 +678,12 @@ public void onPartialResult(Hypothesis hypothesis) {
                 */
             } else if (hypothesis.getHypstr().equals("abre whatsapp")) {
 
-
+                textToSpeech.speak("Abriendo envío de whatsapp", TextToSpeech.QUEUE_FLUSH, null, null);
                 Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
                 startActivity(telefonos);
 
                 recognizer.stop();
+                finish();
                // recognizer.startListening(MENU_SEARCH);
 
             } else if (hypothesis.getHypstr().equals("abre spotify")) {
@@ -718,10 +719,8 @@ public void onPartialResult(Hypothesis hypothesis) {
                 creaMusica();
 
                 // musica = true;
-                textToSpeech.speak("reproduciendo", TextToSpeech.QUEUE_FLUSH, null, null);
+                textToSpeech.speak("Abriendo música", TextToSpeech.QUEUE_FLUSH, null, null);
                 recognizer.stop();
-
-
 
             }
 
@@ -774,11 +773,7 @@ public void onPartialResult(Hypothesis hypothesis) {
 
             else if(hypothesis.getHypstr().equals("enviar correo")){
 
-                Intent intent = new Intent();
-                intent.setClass(MainActivity.this, Dictado.class);
-                startActivity(intent);
-                recognizer.stop();
-                finish();
+
 
             }
 

@@ -1,36 +1,24 @@
 package com.example.pelu.viki;
 
-import android.app.ActionBar;
-import android.app.Activity;
-import android.app.ListActivity;
-import android.app.SearchManager;
+
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.MatrixCursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CursorAdapter;
 import android.widget.EditText;
-import android.widget.FilterQueryProvider;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.SimpleAdapter;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -41,6 +29,11 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
 
     EditText inputSearch;
     private ArrayAdapter<String> adapters;
+    private  String[] parts;
+    private String part1;
+    private String part2;
+    private Boolean voz ;
+    private String textoGrabado;
     ListView listaTelefonos;
 
     private static final int RECOGNIZE_SPEECH_ACTIVITY = 1;
@@ -82,33 +75,45 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+                voz = false;
 
             //todo: obtener el telefono para pasarlo a la activity y cerrar esta //
                // System.out.println(adapters.getItem(position));
                   String fichaContacto = adapters.getItem(position);
 
-                String[] parts = fichaContacto.split("\\n");
-                String part1 = parts[0]; // NOMBRE
-                String part2 = parts[1]; // Numero
+                 parts = fichaContacto.split("\\n");
+                 part1 = parts[0]; // NOMBRE
+                 part2 = parts[1]; // Numero
 
                 System.out.println(" PARTE 1" + part1);
                 System.out.println(" PARTE2 " + part2);
 
-                Intent intent = new Intent(getApplicationContext(), Dictado.class);
-                intent.putExtra("phone", part2);
-                startActivity(intent);
+                                         /*
+        Reconocimiento de voz para buscar los contactos
+                                */
 
-                finish();
+                Intent intentActionRecognizeSpeech = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+
+                // Configura el Lenguaje (Español-México)
+                intentActionRecognizeSpeech.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, "es-ES");
+                intentActionRecognizeSpeech.putExtra(RecognizerIntent.EXTRA_PROMPT,"Texto a enviar");
+
+                try {
+                    startActivityForResult(intentActionRecognizeSpeech, RECOGNIZE_SPEECH_ACTIVITY);
+
+                } catch (ActivityNotFoundException a) {
+                    Toast.makeText(getApplicationContext(),"Tú dispositivo no soporta el reconocimiento por voz",  Toast.LENGTH_SHORT).show();
+
+                }
 
             }
         });
-
 
         inputSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-
+                voz= true;
                                  /*
         Reconocimiento de voz para buscar los contactos
                                 */
@@ -119,6 +124,7 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
                 // Configura el Lenguaje (Español-México)
                 intentActionRecognizeSpeech.putExtra(
                         RecognizerIntent.EXTRA_LANGUAGE_MODEL, "es-ES");
+                intentActionRecognizeSpeech.putExtra(RecognizerIntent.EXTRA_PROMPT,"Busca un contacto");
                 try {
                     startActivityForResult(intentActionRecognizeSpeech,
                             RECOGNIZE_SPEECH_ACTIVITY);
@@ -185,13 +191,42 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
                                     EXTRA_RESULTS);
                     String strSpeech2Text = speech.get(0);
 
-                    inputSearch.setText(strSpeech2Text);
-                }
+                    if(voz == false){
 
+                        textoGrabado = strSpeech2Text;
+                        openWhatsApp(textoGrabado,part2);
+
+
+                    }
+                    else if (voz == true){
+                        inputSearch.setText(strSpeech2Text);
+
+                    }
+
+                }
                 break;
             default:
 
                 break;
+        }
+    }
+
+    /*
+        Abre whatsapp y envía mensaje al numero indicado
+                             */
+    public void openWhatsApp(String texto, String telefono){
+        try {
+            String text = texto ;// Replace with your message.
+
+            String toNumber = telefono; // Replace with mobile phone number without +Sign or leading zeros.
+
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("http://api.whatsapp.com/send?phone="+toNumber +"&text="+text));
+            startActivity(intent);
+        }
+        catch (Exception e){
+            e.printStackTrace();
         }
     }
 
