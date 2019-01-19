@@ -105,12 +105,37 @@
             style="@android:style/Widget.Material.Button.Colored"
             android:layout_width="84dp"
             android:layout_height="79dp"
+            android:layout_alignStart="@+id/TablaSpoty"
             android:layout_below="@+id/TablaSpoty"
-            android:layout_centerHorizontal="true"
             android:background="@color/BckgroundColor"
-            android:text="Encendido remoto"
+            android:text="Prueba"
             tools:layout_editor_absoluteX="210dp"
             tools:layout_editor_absoluteY="0dp" />
+
+        <pl.bclogic.pulsator4droid.library.PulsatorLayout
+            android:id="@+id/pulsator"
+            android:layout_width="218dp"
+            android:layout_height="157dp"
+            android:layout_alignBottom="@+id/button"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="12dp"
+            app:pulse_color="@color/colorAccent"
+            app:pulse_count="4"
+            app:pulse_duration="7000"
+            app:pulse_interpolator="Decelerate"
+            app:pulse_repeat="0"
+            app:pulse_startFromScratch="false"
+            tools:layout_editor_absoluteX="205dp"
+            tools:layout_editor_absoluteY="419dp">
+
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_centerInParent="true"
+                android:contentDescription="@string/image_description_android_phone"
+                android:src="@drawable/android_phone" />
+
+        </pl.bclogic.pulsator4droid.library.PulsatorLayout>
 
         <View
             android:id="@+id/view"

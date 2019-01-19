@@ -11,7 +11,9 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/mail" />
             <option value="$PROJECT_DIR$/mobile" />
+            <option value="$PROJECT_DIR$/mylibrary" />
             <option value="$PROJECT_DIR$/pocketsphinx-android-5prealpha-release" />
+            <option value="$PROJECT_DIR$/pulsator4droid" />
             <option value="$PROJECT_DIR$/things" />
             <option value="$PROJECT_DIR$/wear" />
           </set>

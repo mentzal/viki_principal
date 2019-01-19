@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.MediaController.MediaPlayerControl;
@@ -74,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
     //activity and playback pause flags
     private boolean paused=false, playbackPaused=false;
+    private boolean maximizado;
 
 
 
@@ -678,7 +680,7 @@ public void onPartialResult(Hypothesis hypothesis) {
                 */
             } else if (hypothesis.getHypstr().equals("abre whatsapp")) {
 
-                textToSpeech.speak("Abriendo envío de whatsapp", TextToSpeech.QUEUE_FLUSH, null, null);
+                textToSpeech.speak("Abriendo", TextToSpeech.QUEUE_FLUSH, null, null);
                 Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
                 startActivity(telefonos);
 
@@ -756,6 +758,15 @@ public void onPartialResult(Hypothesis hypothesis) {
                 recognizer.stop();
                 recognizer.startListening(MENU_SEARCH);
             }
+            else if(hypothesis.getHypstr().equals("hola viki")&& maximizado == true){
+
+                Intent principal = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(principal);
+                System.out.println("ESTAMOS DENTRO !!!!!!!!!");
+
+            }
+
+
 
             else if(hypothesis.getHypstr().equals("manda correo")){
                 textToSpeech.speak("Enviando correo", TextToSpeech.QUEUE_FLUSH, null, null);
@@ -772,8 +783,6 @@ public void onPartialResult(Hypothesis hypothesis) {
             }
 
             else if(hypothesis.getHypstr().equals("enviar correo")){
-
-
 
             }
 
@@ -823,7 +832,14 @@ public void onPartialResult(Hypothesis hypothesis) {
     public void onStop() {
 
         //controller.hide();
+                        /*
+        Aplicacion en segundo plano (minimizada)
+                        */
+        maximizado = true; //intentamos traerla al frente pero no funciona //
+        System.out.println("Estamos fuerisima!!!!!!!!!!!!!!!!!!");
         super.onStop();
+
+
 
         /*
         if (recognizer != null) {
@@ -842,6 +858,7 @@ public void onPartialResult(Hypothesis hypothesis) {
 
     @Override
     public void pause() {
+
         playbackPaused=true;
         musicSrv.pausePlayer();
         recognizer.startListening(MENU_SEARCH);

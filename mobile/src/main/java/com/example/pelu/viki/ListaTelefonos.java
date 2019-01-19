@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.speech.RecognitionListener;
@@ -21,8 +22,12 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.cmu.pocketsphinx.Assets;
 
 public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
@@ -194,8 +199,31 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
                     if(voz == false){
 
                         textoGrabado = strSpeech2Text;
-                        openWhatsApp(textoGrabado,part2);
 
+                                            /*
+                        Abre whatsup y vuelve a la activity principal
+                                            */
+
+                        new AsyncTask<Void, Void, Exception>() {
+                            @Override
+                            protected Exception doInBackground(Void... params) {
+                                try {
+                                    openWhatsApp(textoGrabado,part2);
+
+
+
+                                    finish();
+                                } catch (Exception e) {
+
+                                    return e;
+                                }
+                                return null;
+                            }
+
+                        }.execute();
+
+                        Intent principal = new Intent(getApplicationContext(), MainActivity.class);
+                        startActivity(principal);
 
                     }
                     else if (voz == true){

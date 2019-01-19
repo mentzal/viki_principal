@@ -1,2 +1,2 @@
-include ':mobile', ':wear', ':things', ':mail'
+include ':mobile', ':wear', ':things', ':mail', ':mylibrary', ':pulsator4droid'
 include ':app', ':pocketsphinx-android-5prealpha-release'

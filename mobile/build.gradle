@@ -46,6 +46,7 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.sun.mail:android-mail:1.5.5'
     implementation 'com.sun.mail:android-activation:1.5.5'
+    implementation 'pl.bclogic:pulsator4droid:1.0.3'
 }
 
 repositories {

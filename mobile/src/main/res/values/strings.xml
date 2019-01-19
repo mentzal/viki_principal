@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">viki</string>
+    <string name="image_description_android_phone">Android Phone Image</string>
 </resources>
