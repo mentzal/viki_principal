@@ -8,10 +8,13 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.AdapterView;
+import android.widget.MediaController;
 import android.widget.MediaController.MediaPlayerControl;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -42,6 +45,8 @@ import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Random;
+
 import android.content.ContentResolver;
 import android.database.Cursor;
 
@@ -55,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     private static final String KWS_SEARCH = "hola";
     private static final String NOMBRE_VIKI = "viki";
     private static final String LISTASPOTY = "loquillo";
+
     private TextToSpeech textToSpeech;
     private MediaPlayer mediaPlayer;
     ArrayList<String> listItems = new ArrayList<String>();
@@ -66,16 +72,11 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     private ArrayList<Song> songList;
     private ArrayList<Song> Dance;
 
-
-    //service
-    private MusicService musicSrv;
-    private Intent playIntent;
-    //binding
-    private boolean musicBound=false;
-
-    //activity and playback pause flags
     private boolean paused=false, playbackPaused=false;
     private boolean maximizado;
+    private boolean directorio;
+
+    private String carpeta;
 
 
 
@@ -173,13 +174,14 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
                                                                 /*
         todo: llamamos a metodos de prueba, como inicir el repriductor, cambiar de activity para dictar y enviar por whatsupp
-                                                                */
+
+
                 Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
                 startActivity(telefonos);
                 recognizer.stop();
                 finish();
-
-               // creaMusica();
+*/
+                creaMusica();
                // recognizer.stop();
 
             }
@@ -188,103 +190,31 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
     }
 
-    //connect to the service
-    private ServiceConnection musicConnection = new ServiceConnection(){
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-
-            MusicService.MusicBinder binder = (MusicService.MusicBinder)service;
-            //get service
-            musicSrv = binder.getService();
-            //pass list
-            musicSrv.setList(songList);
-
-            musicBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            musicBound = false;
-        }
-    };
-
-
-    //start and bind the service when the activity starts
-    @Override
-    protected void onStart() {
-
-        super.onStart();
-
-        if(playIntent==null){
-            playIntent = new Intent(this, MusicService.class);
-            bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
-            startService(playIntent);
-        }
-
-    }
-
-
-    //user song select
-    public void songPicked(View view){
-        musicSrv.setSong(Integer.parseInt(view.getTag().toString()));
-        musicSrv.playSong();
-        recognizer.stop();
-        if(playbackPaused){
-            setController();
-            playbackPaused=false;
-        }
-        controller.show(0);
-    }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         //menu item selected
         switch (item.getItemId()) {
             case R.id.action_shuffle:
-                musicSrv.setShuffle();
+                if(mediaPlayer != null){
+                    mediaPlayer.stop();
+                    controller.setVisibility(View.INVISIBLE);
+                    recognizer.stop();
+                    recognizer.startListening(MENU_SEARCH);
+                }
+
+             listaDispo.setVisibility(View.INVISIBLE);
+
                 break;
             case R.id.action_end:
-                stopService(playIntent);
-                musicSrv=null;
+               // stopService(playIntent);
+                mediaPlayer.stop();
+                mediaPlayer = null;
                 System.exit(0);
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
-
-    /*
-    Obtencion de los datos de las canciones
-     */
-
-    public void getSongList(Uri direccion, ArrayList<Song> arraycanciones) {
-
-        arraycanciones.clear();
-        ContentResolver musicResolver = getContentResolver();
-        Uri musicUri = direccion;
-        Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
-
-        if(musicCursor!=null && musicCursor.moveToFirst()){
-            //get columns
-            int titleColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media.TITLE);
-            int idColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media._ID);
-            int artistColumn = musicCursor.getColumnIndex
-                    (android.provider.MediaStore.Audio.Media.ARTIST);
-            //add songs to list
-            do {
-                long thisId = musicCursor.getLong(idColumn);
-                String thisTitle = musicCursor.getString(titleColumn);
-                String thisArtist = musicCursor.getString(artistColumn);
-                arraycanciones.add(new Song(thisId, thisTitle, thisArtist));
-            }
-            while (musicCursor.moveToNext());
-        }
-
-    }
-
 
                                         /*
 Llamada al archivo xml que contien el menu.superior.. si no dará error
@@ -364,95 +294,218 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
         SongAdapter songAdt = new SongAdapter(this, songList);
         listaDispo.setAdapter(songAdt);
 
-                            /*
-        Aplicams al vista del control de conciones
-                             */
-        setController();
 
-
-        if (dance == true && spoty_playLists == false) {
-
-            getSongList(android.provider.MediaStore.Audio.Media.getContentUriForPath("/storage/emulated/0/Music"),songList);
-
-        }
-
-        else if (dance == false && spoty_playLists == false) {
-
-
-            getSongList(android.provider.MediaStore.Audio.Media.getContentUriForPath("/storage/emulated/0/Music"),songList);
-        }
+        final String Cancion;
+        listaDispo.setBackgroundColor(colorFondoLista);
+        final String PATH_TO_FILE = "/sdcard/Music/";
 
 
 
-        else if(spoty_playLists == true){
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems) {
 
-            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems) {
-
-                @Override
-                public View getView(int position, View convertView, ViewGroup parent) {
-
-
-                    View view = super.getView(position, convertView, parent);
-
-                    TextView ListItemShow = (TextView) view.findViewById(android.R.id.text1);
-
-                    ListItemShow.setTextColor(Color.parseColor("#FFFFFF"));
+            /*
+   ESTILO TEXTVIEW DE LA LISTA
+           */
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
 
 
-                    return view;
+                View view = super.getView(position, convertView, parent);
+
+                TextView ListItemShow = (TextView) view.findViewById(android.R.id.text1);
+
+                ListItemShow.setTextColor(Color.parseColor("#FFFFFF"));
+
+
+                return view;
+            }
+
+        };
+
+
+            try {
+                File f = new File(Environment.getExternalStorageDirectory() + "/Music");
+                File[] files = f.listFiles();
+                adapter.clear();
+
+                for (int i = 0; i < files.length; i++)
+
+                {
+                    //Sacamos del array files un fichero
+                    File file = files[i];
+
+                    //Si es directorio...
+                    if (file.isDirectory())
+
+                        adapter.add(file.getName() + "/");
+                        directorio = true;
+
+                    /*
+                        //Si es fichero...
+                    else
+
+                        adapter.add(file.getName()); */
                 }
-            };
-                 try{
 
+            } catch (Exception e) {
 
-                    adapter.clear();
-                    for(int i = 0; i<Playlist.length; i++){
+                showAlert();
+                System.out.println("Primera lista");
+            }
 
-                        adapter.add(tituloPlayList[i].toString());
-                        adapter.add(Playlist[i].toString());
-
-
-                    }
-                    spotifyTabla.setVisibility(View.INVISIBLE);
-                }catch (Exception e){
-
-                    // showAlert();
-                }
 
             listaDispo.setAdapter(adapter);
-
-            // Accion para realizar al pulsar sobre un item de la lista
-            listaDispo.setOnItemClickListener(  new AdapterView.OnItemClickListener() {
+            listaDispo.setVisibility(View.VISIBLE); //hace invisible o visible la lista //
 
 
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        // Accion para realizar al pulsar sobre un item de la lista
+        listaDispo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-                    System.out.println(adapter.getItem(i));
 
-                    if (spoty_playLists == true) {
+          @Override
+          public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                        abrespoty(adapter.getItem(i));
+
+              final String Cancion;
+
+
+              listaDispo.setBackgroundColor(colorFondoLista);
+
+
+            if(directorio == true){
+
+                 directorio = false;
+                 carpeta = adapter.getItem(i).toString();
+
+                try {
+                    File f = new File(Environment.getExternalStorageDirectory() + "/Music/" + adapter.getItem(i));
+                    File[] files = f.listFiles();
+                    adapter.clear();
+
+                    for (int j = 0; j < files.length; j++)
+
+                    {
+                        //Sacamos del array files un fichero
+                        File file = files[j];
+
+                        //Si es directorio...
+                        if (file.isDirectory())
+
+                            adapter.add(file.getName() + "/");
+
+
+                            //Si es fichero...
+                        else
+                            adapter.add(file.getName());
+
+
                     }
+
+                } catch (Exception e) {
+
+                    showAlert();
+                    System.out.println("Segunda lista");
                 }
-            });
+
+            }
+                            /*
+            Reproducimos la cancion seleccionada
+                             */
+
+            else if(directorio == false){
+
+                System.out.println("REPRODUCIMOS LA CANCION");
+                try{
+                    Cancion =PATH_TO_FILE +carpeta + adapter.getItem(i);
+                    System.out.println(Cancion);
+
+                    mediaPlayer = new MediaPlayer();
+                    try {
+                        mediaPlayer.setDataSource(Cancion);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        mediaPlayer.prepare();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    mediaPlayer.start();
+                    recognizer.stop();
+
+
+                }catch (Exception e){
+
+                    showAlert();
+                }
+
+                setController();
 
             }
 
-            listaDispo.setVisibility(View.VISIBLE);
+              listaDispo.setAdapter(adapter);
+              listaDispo.setVisibility(View.VISIBLE); //hace invisible o visible la lista //
 
-            recognizer.stop();
-            recognizer.startListening(MENU_SEARCH);
+          }
+      });
 
     }
+
+    //play next
+    private void playNext(){
+
+        recognizer.stop();
+        mediaPlayer.stop();
+
+       final String PATH_TO_FILE = "/sdcard/Music/";
+
+        Random rand = new Random();
+        int n = rand.nextInt(adapter.getCount());
+
+       String Cancion = PATH_TO_FILE +carpeta + adapter.getItem( n);
+       System.out.println(adapter.getItem(0).toString());
+      // mediaPlayer.stop();
+
+        mediaPlayer = new MediaPlayer();
+
+        try {
+            mediaPlayer.setDataSource(Cancion);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            mediaPlayer.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        mediaPlayer.start();
+    }
+
+    //play previous
+    private void playPrev(){
+
+
+        //  recognizer.stop();
+        //  musicSrv.playPrev();
+        if(playbackPaused){
+            setController();
+            playbackPaused=false;
+        }
+        controller.show(0);
+    }
+
 
 @Override
 protected void onPause() {
    super.onPause();
+
     paused=true;
 
 }
-
 
     @Override
     protected void onResume(){
@@ -464,13 +517,6 @@ protected void onPause() {
     }
 
 
-
-public void apagarViki() {
-   textToSpeech.speak("apagando", TextToSpeech.QUEUE_FLUSH, null, null);
-   recognizer.stop();
-
-}
-
 //todo: abre el nabegador chrome //
 void open(Activity activity, String url) {
    Uri uri = Uri.parse("googlechrome://navigate?url=" + url);
@@ -480,7 +526,6 @@ void open(Activity activity, String url) {
    }
    activity.startActivity(i);
 }
-
 
 private void runRecognizerSetup() {
    // Recognizer initialization is a time-consuming and it involves IO,
@@ -851,44 +896,43 @@ public void onPartialResult(Hypothesis hypothesis) {
 
     @Override
     public void start() {
-        musicSrv.go();
+        mediaPlayer.start();
         recognizer.stop();
 
     }
 
     @Override
     public void pause() {
+       // playbackPaused=true;
+        mediaPlayer.pause();
 
-        playbackPaused=true;
-        musicSrv.pausePlayer();
         recognizer.startListening(MENU_SEARCH);
     }
 
+
+
     @Override
     public int getDuration() {
-        if(musicSrv!=null && musicBound && musicSrv.isPng())
-            return musicSrv.getDur();
-        else return 0;
+
+        return mediaPlayer.getDuration();
+
     }
 
     @Override
     public int getCurrentPosition() {
-        if(musicSrv!=null && musicBound && musicSrv.isPng())
-            return musicSrv.getPosn();
-        else return 0;
+       return mediaPlayer.getCurrentPosition();
     }
 
     @Override
     public void seekTo(int pos) {
-        musicSrv.seek(pos);
+        mediaPlayer.seekTo(pos);
+
     }
 
     @Override
     public boolean isPlaying() {
-        if(musicSrv!=null && musicBound)
+        return mediaPlayer.isPlaying();
 
-        return musicSrv.isPng();
-        return false;
     }
 
     @Override
@@ -913,7 +957,7 @@ public void onPartialResult(Hypothesis hypothesis) {
 
     @Override
     public int getAudioSessionId() {
-        return 0;
+        return mediaPlayer.getAudioSessionId();
     }
 
        /*
@@ -942,29 +986,8 @@ public void onPartialResult(Hypothesis hypothesis) {
         controller.setMediaPlayer(this);
         controller.setAnchorView(findViewById(R.id.view));
         controller.setEnabled(true);
+        controller.show();
     }
 
-
-    //play next
-    private void playNext(){
-        musicSrv.playNext();
-        recognizer.stop();
-        if(playbackPaused){
-            setController();
-            playbackPaused=false;
-        }
-        controller.show(0);
     }
 
-    //play previous
-    private void playPrev(){
-        recognizer.stop();
-        musicSrv.playPrev();
-        if(playbackPaused){
-            setController();
-            playbackPaused=false;
-        }
-        controller.show(0);
-    }
-
-}

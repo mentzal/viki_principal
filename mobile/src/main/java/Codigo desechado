@@ -1,0 +1,288 @@
+
+    public void creaMusica() {
+
+
+        final String Cancion;
+        listaDispo.setBackgroundColor(colorFondoLista);
+
+
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems) {
+
+
+            /*
+    ESTILO TEXTVIEW DE LA LISTA
+            */
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+
+
+                View view = super.getView(position, convertView, parent);
+
+                TextView ListItemShow = (TextView) view.findViewById(android.R.id.text1);
+
+                ListItemShow.setTextColor(Color.parseColor("#FFFFFF"));
+
+
+                return view;
+            }
+        };
+
+
+        if (dance == true && spoty_playLists == false) {
+
+            try{
+                File f = new File(Environment.getExternalStorageDirectory() + "/Music/dance");
+                File[] files = f.listFiles();
+                adapter.clear();
+
+                for (int i = 0; i < files.length; i++)
+
+                {
+                    //Sacamos del array files un fichero
+                    File file = files[i];
+
+                    //Si es directorio...
+                    if (file.isDirectory())
+
+                        adapter.add(file.getName() + "/");
+
+                        //Si es fichero...
+                    else
+
+                        adapter.add(file.getName());
+                }
+            }catch (Exception e){
+
+                showAlert();
+            }
+
+        } else if (dance == false && spoty_playLists == false) {
+
+            try{
+                File f = new File(Environment.getExternalStorageDirectory() + "/Music/");
+                File[] files = f.listFiles();
+                adapter.clear();
+
+                for (int i = 0; i < files.length; i++)
+
+                {
+                    //Sacamos del array files un fichero
+                    File file = files[i];
+
+                    //Si es directorio...
+                    if (file.isDirectory()){
+
+                    }
+
+                    // adapter.add(file.getName() + "/"); //todo: añade al array los directorios (carpetas).--
+
+                    //Si es fichero...
+                    else
+
+                        adapter.add(file.getName());
+                }
+            }catch (Exception e ){
+
+                showAlert();
+            }
+
+        }
+
+        //todo: preparando para mostrar la lista de playlist de spotify
+
+        else if(spoty_playLists == true){
+
+            try{
+
+
+                adapter.clear();
+                for(int i = 0; i<Playlist.length; i++){
+
+                    adapter.add(tituloPlayList[i].toString());
+                    adapter.add(Playlist[i].toString());
+
+
+                }
+                spotifyTabla.setVisibility(View.INVISIBLE);
+            }catch (Exception e){
+
+                showAlert();
+            }
+
+        }
+
+
+
+        -----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+                            /*
+        Aplicams al vista del control de conciones
+
+        setController();
+
+
+        if (dance == true && spoty_playLists == false) {
+
+            getSongList(android.provider.MediaStore.Audio.Media.getContentUriForPath("/storage/emulated/0/Music"),songList);
+
+        }
+
+        else if (dance == false && spoty_playLists == false) {
+
+
+            getSongList(android.provider.MediaStore.Audio.Media.getContentUriForPath("/storage/emulated/0/Music"),songList);
+        }
+
+
+
+        else if(spoty_playLists == true){
+
+            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems) {
+
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+
+
+                    View view = super.getView(position, convertView, parent);
+
+                    TextView ListItemShow = (TextView) view.findViewById(android.R.id.text1);
+
+                    ListItemShow.setTextColor(Color.parseColor("#FFFFFF"));
+
+
+                    return view;
+                }
+            };
+                 try{
+
+
+                    adapter.clear();
+                    for(int i = 0; i<Playlist.length; i++){
+
+                        adapter.add(tituloPlayList[i].toString());
+                        adapter.add(Playlist[i].toString());
+
+
+                    }
+                    spotifyTabla.setVisibility(View.INVISIBLE);
+                }catch (Exception e){
+
+                    // showAlert();
+                }
+
+            listaDispo.setAdapter(adapter);
+
+            // Accion para realizar al pulsar sobre un item de la lista
+            listaDispo.setOnItemClickListener(  new AdapterView.OnItemClickListener() {
+
+
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                    System.out.println(adapter.getItem(i));
+
+                    if (spoty_playLists == true) {
+
+                        abrespoty(adapter.getItem(i));
+                    }
+                }
+            });
+
+            }
+
+            listaDispo.setVisibility(View.VISIBLE);
+
+            recognizer.stop();
+            recognizer.startListening(MENU_SEARCH);
+*/
+
+ /*
+    Obtencion de los datos de las canciones
+
+
+    public void getSongList(Uri direccion, ArrayList<Song> arraycanciones) {
+
+        arraycanciones.clear();
+        ContentResolver musicResolver = getContentResolver();
+        Uri musicUri = direccion;
+        Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
+
+        if(musicCursor!=null && musicCursor.moveToFirst()){
+            //get columns
+            int titleColumn = musicCursor.getColumnIndex
+                    (android.provider.MediaStore.Audio.Media.TITLE);
+            int idColumn = musicCursor.getColumnIndex
+                    (android.provider.MediaStore.Audio.Media._ID);
+            int artistColumn = musicCursor.getColumnIndex
+                    (android.provider.MediaStore.Audio.Media.ARTIST);
+            //add songs to list
+            do {
+                long thisId = musicCursor.getLong(idColumn);
+                String thisTitle = musicCursor.getString(titleColumn);
+                String thisArtist = musicCursor.getString(artistColumn);
+                arraycanciones.add(new Song(thisId, thisTitle, thisArtist));
+            }
+            while (musicCursor.moveToNext());
+        }
+
+    }
+*/
+
+
+/*
+    //connect to the service
+    private ServiceConnection musicConnection = new ServiceConnection(){
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+
+            MusicService.MusicBinder binder = (MusicService.MusicBinder)service;
+            //get service
+            musicSrv = binder.getService();
+            //pass list
+            musicSrv.setList(songList);
+
+            musicBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            musicBound = false;
+        }
+    };
+
+
+    //start and bind the service when the activity starts
+    @Override
+    protected void onStart() {
+
+        super.onStart();
+
+        if(playIntent==null){
+            playIntent = new Intent(this, MusicService.class);
+            bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
+            startService(playIntent);
+        }
+
+    }
+
+*/
+
+
+//user song select
+    public void songPicked(View view){
+        musicSrv.setSong(Integer.parseInt(view.getTag().toString()));
+        musicSrv.playSong();
+        recognizer.stop();
+        if(playbackPaused){
+            setController();
+            playbackPaused=false;
+        }
+        controller.show(0);
+    }
