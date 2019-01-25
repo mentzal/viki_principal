@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.view.MenuInflater;
@@ -103,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     private boolean listaRepord =  false;
     private boolean albumes =  false;
     private boolean artistas =  false;
+    private boolean estadoVoz = false;
 
 
     MailJob mail;
@@ -155,7 +157,6 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         listaDispo.setVisibility(View.INVISIBLE);
 
 
-
                                     /*
         Prueba de acciones del boton-- whatsapp y encendido remoto
                                     */
@@ -186,14 +187,20 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
                 recognizer.stop();
                 finish();
 */
-                 creaMusica();
+                 //creaMusica();
                // recognizer.stop();
+                Intent telefonos = new Intent(getApplicationContext(), MapsActivity.class);
+                startActivity(telefonos);
 
             }
 
         });
 
+
+
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -205,9 +212,15 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
                     controller.setVisibility(View.INVISIBLE);
                     recognizer.stop();
                     recognizer.startListening(MENU_SEARCH);
+
+
                 }
 
              listaDispo.setVisibility(View.INVISIBLE);
+
+
+               invalidateOptionsMenu();
+
 
                 break;
             case R.id.action_end:
@@ -227,23 +240,50 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 Llamada al archivo xml que contien el menu.superior.. si no dará error
                                         */
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onPrepareOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+
+        menu.clear();
+
 
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
 
+
+         System.out.println("ESTAMOS DENTRO DEL MENÚ !!!");
+
         MenuItem off = menu.findItem(R.id.estadoVikiOff);
         MenuItem on = menu.findItem(R.id.estadoVikiOn);
+        off.setVisible(false);
+        on.setVisible(false);
 
-        if(recognizer!= null){
+        /*
+        Retardo para las imágenes dle menú principal
+         */
 
-            on.setVisible(false);
-        }
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
 
-        else{
-             off.setVisible(false);
-        }
+                MenuItem off = menu.findItem(R.id.estadoVikiOff);
+                MenuItem on = menu.findItem(R.id.estadoVikiOn);
+
+
+                if(estadoVoz == true){
+                    System.out.println("ESTAMOS DENTRO DEL MENÚ !!!");
+
+                    on.setVisible(true);
+                    off.setVisible(false);
+                }
+
+                else if(estadoVoz == false){
+                    on.setVisible(false);
+                    off.setVisible(true);
+                }
+
+            }
+        }, 500);
 
         return true;
     }
@@ -362,11 +402,6 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
                         adapter.add(file.getName() + "/");
                         directorio = true;
 
-                    /*
-                        //Si es fichero...
-                    else
-
-                        adapter.add(file.getName()); */
                 }
 
             } catch (Exception e) {
@@ -420,7 +455,6 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
                         else
                             adapter.add(file.getName());
 
-
                     }
 
                 } catch (Exception e) {
@@ -435,6 +469,8 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
                              */
 
             else if(directorio == false){
+
+
 
                 if(mediaPlayer != null){
 
@@ -458,7 +494,10 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
                         e.printStackTrace();
                     }
                     mediaPlayer.start();
+                    //
                     recognizer.stop();
+                    estadoVoz = false;
+                    invalidateOptionsMenu(); //resetea el menu para cambiar estado del icono del micro.
 
                     mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
@@ -484,6 +523,7 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
 
                             mediaPlayer.start();
                             recognizer.stop();
+                            estadoVoz = false;
                         }
                     });
 
@@ -518,7 +558,9 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
     private void playNext(){
 
         recognizer.stop();
+        estadoVoz = false;
         mediaPlayer.stop();
+        invalidateOptionsMenu();
 
        final String PATH_TO_FILE = "/sdcard/Music/";
 
@@ -562,7 +604,7 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
 @Override
 protected void onPause() {
    super.onPause();
-
+    invalidateOptionsMenu();
     paused=true;
 
 }
@@ -570,6 +612,7 @@ protected void onPause() {
     @Override
     protected void onResume(){
         super.onResume();
+        invalidateOptionsMenu();
         if(paused){
             //setController();
             paused=false;
@@ -594,6 +637,7 @@ private void runRecognizerSetup() {
        @Override
        protected Exception doInBackground(Void... params) {
            try {
+               estadoVoz = true;
                Assets assets = new Assets(MainActivity.this);
                File assetDir = assets.syncAssets();
                setupRecognizer(assetDir);
@@ -659,6 +703,8 @@ protected void onDestroy() {
 
 @Override
 public void onEndOfSpeech() {
+
+
    if (!recognizer.getSearchName().equals(KWS_SEARCH))
        switchSearch(KWS_SEARCH);
 
@@ -681,6 +727,7 @@ public void onPartialResult(Hypothesis hypothesis) {
 
    if (text.equals(KEYPHRASE)) {
        recognizer.stop();
+       estadoVoz = false;
        switchSearch(MENU_SEARCH);
    } else
 
@@ -790,6 +837,7 @@ public void onPartialResult(Hypothesis hypothesis) {
                 startActivity(telefonos);
 
                 recognizer.stop();
+                estadoVoz = false;
                 finish();
                // recognizer.startListening(MENU_SEARCH);
 
@@ -828,13 +876,14 @@ public void onPartialResult(Hypothesis hypothesis) {
                 // musica = true;
                 textToSpeech.speak("Abriendo música", TextToSpeech.QUEUE_FLUSH, null, null);
                 recognizer.stop();
+                estadoVoz = false;
 
             }
 
              else if (hypothesis.getHypstr().equals("cierra música")) {
                 dance = false;
                 controller.hide();
-                recognizer.stop();
+                estadoVoz = false;
                 listaDispo.setVisibility(View.INVISIBLE);
                 recognizer.startListening(MENU_SEARCH);
             }
@@ -845,6 +894,7 @@ public void onPartialResult(Hypothesis hypothesis) {
                 // mediaPlayer.stop();
                 creaMusica();
                 recognizer.stop();
+
 
                 //  lista.setVisibility(View.INVISIBLE);
                 recognizer.startListening(MENU_SEARCH);
@@ -914,8 +964,10 @@ public void onPartialResult(Hypothesis hypothesis) {
         recognizer.stop();
 
         if (searchName.equals(KWS_SEARCH)) {
+            estadoVoz = true;
             recognizer.startListening(searchName);
         } else {
+            estadoVoz = true;
             // textToSpeech.speak("no se ha accedido al menú", TextToSpeech.QUEUE_FLUSH, null,null);
 
             recognizer.startListening(searchName, 10000);
@@ -947,16 +999,33 @@ public void onPartialResult(Hypothesis hypothesis) {
 
     @Override
     public void start() {
+
         mediaPlayer.start();
         recognizer.stop();
-
+        estadoVoz = false;
+        invalidateOptionsMenu();
     }
 
     @Override
     public void pause() {
        // playbackPaused=true;
+
         mediaPlayer.pause();
-        recognizer.startListening(MENU_SEARCH);
+        invalidateOptionsMenu();
+        estadoVoz= true;
+        final Handler handler = new Handler();
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                recognizer.stop();
+                recognizer.startListening(KWS_SEARCH);
+
+
+            }
+        }, 1000);
+
     }
 
 
