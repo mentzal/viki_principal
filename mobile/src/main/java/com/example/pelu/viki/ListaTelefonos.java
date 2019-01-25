@@ -14,6 +14,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -41,17 +43,25 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
     private String textoGrabado;
     ListView listaTelefonos;
 
+    MenuItem MusicaPlay, MusicaNext, MusicaStop;
+
     private static final int RECOGNIZE_SPEECH_ACTIVITY = 1;
 
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list);
-        setTitle("Choose a phone");
+
 
         inputSearch = (EditText) findViewById(R.id.inputSearch);
         ArrayList<String> datos = new ArrayList<String>();
         listaTelefonos = (ListView) findViewById(R.id.list);
+        MusicaNext = (MenuItem) findViewById(R.id.action_shuffle);
+        MusicaStop = (MenuItem) findViewById(R.id.action_end);
+
+
+
+
 
         Cursor mCursor = getContentResolver().query(
 
@@ -261,11 +271,33 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
     @Override
 
     public boolean onCreateOptionsMenu(Menu menu) {
-        /*
+
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_search, menu);
-        */
+        inflater.inflate(R.menu.menu, menu);
+
+        MenuItem sufle = menu.findItem(R.id.action_shuffle);
+        MenuItem salir = menu.findItem(R.id.action_end);
+
+
+        sufle.setVisible(false);
+        salir.setVisible(false);
+
+        MenuItem off = menu.findItem(R.id.estadoVikiOff);
+        MenuItem on = menu.findItem(R.id.estadoVikiOn);
+        on.setVisible(false);
+
+
+
         return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+
+
+        return super.onOptionsItemSelected(item);
     }
 
         @Override

@@ -11,6 +11,7 @@ import android.media.MediaPlayer;
 import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.view.MenuInflater;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -92,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     ListView listaDispo;
     Button playlist, canciones,album, artista;
     TableLayout spotifyTabla;
-    MenuItem MusicaPlay, MusicaNext, MusicaStop;
+    MenuItem MusicaPlay, MusicaNext, MusicaStop,ocupado, libre;
     View PanelMusica;
 
 
@@ -130,6 +131,9 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
         MusicaNext = (MenuItem) findViewById(R.id.action_shuffle);
         MusicaStop = (MenuItem) findViewById(R.id.action_end);
+        ocupado = (MenuItem) findViewById(R.id.estadoVikiOff);
+        libre = (MenuItem) findViewById(R.id.estadoVikiOn);
+
         listaDispo = (ListView) findViewById(R.id.lista);
         playlist = (Button) findViewById(R.id.button8);
         canciones = (Button) findViewById(R.id.button7);
@@ -149,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         runRecognizerSetup();
 
         listaDispo.setVisibility(View.INVISIBLE);
+
 
 
                                     /*
@@ -181,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
                 recognizer.stop();
                 finish();
 */
-                creaMusica();
+                 creaMusica();
                // recognizer.stop();
 
             }
@@ -189,7 +194,6 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         });
 
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -208,7 +212,9 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
                 break;
             case R.id.action_end:
                // stopService(playIntent);
-                mediaPlayer.stop();
+                if(mediaPlayer != null){
+                    mediaPlayer.stop();
+                }
                 mediaPlayer = null;
                 System.exit(0);
                 break;
@@ -216,13 +222,29 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         return super.onOptionsItemSelected(item);
     }
 
+
                                         /*
 Llamada al archivo xml que contien el menu.superior.. si no dará error
                                         */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu, menu);
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+
+        MenuItem off = menu.findItem(R.id.estadoVikiOff);
+        MenuItem on = menu.findItem(R.id.estadoVikiOn);
+
+        if(recognizer!= null){
+
+            on.setVisible(false);
+        }
+
+        else{
+             off.setVisible(false);
+        }
+
         return true;
     }
 
@@ -358,9 +380,9 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
             listaDispo.setVisibility(View.VISIBLE); //hace invisible o visible la lista //
 
 
+
         // Accion para realizar al pulsar sobre un item de la lista
         listaDispo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
 
           @Override
           public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -414,6 +436,11 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
 
             else if(directorio == false){
 
+                if(mediaPlayer != null){
+
+                    mediaPlayer.stop();
+                }
+
                 System.out.println("REPRODUCIMOS LA CANCION");
                 try{
                     Cancion =PATH_TO_FILE +carpeta + adapter.getItem(i);
@@ -433,10 +460,46 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
                     mediaPlayer.start();
                     recognizer.stop();
 
+                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            mediaPlayer.stop();
+                            Random rand = new Random();
+                            int n = rand.nextInt(adapter.getCount());
+                            String Cancion = PATH_TO_FILE +carpeta + adapter.getItem(n);
+
+                            try {
+                                mediaPlayer.reset();
+                                mediaPlayer.setDataSource(Cancion);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            try {
+                                mediaPlayer.prepare();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                            mediaPlayer.start();
+                            recognizer.stop();
+                        }
+                    });
 
                 }catch (Exception e){
 
                     showAlert();
+                }
+
+                /*
+                Si el controlador está lleno lo borramos y abrimos otro
+                para que no se acumulen
+                 */
+
+                if(controller != null){
+
+                    controller.setVisibility(View.INVISIBLE);
                 }
 
                 setController();
@@ -461,14 +524,11 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
 
         Random rand = new Random();
         int n = rand.nextInt(adapter.getCount());
+        String Cancion = PATH_TO_FILE +carpeta + adapter.getItem(n);
 
-       String Cancion = PATH_TO_FILE +carpeta + adapter.getItem( n);
-       System.out.println(adapter.getItem(0).toString());
-      // mediaPlayer.stop();
-
-        mediaPlayer = new MediaPlayer();
 
         try {
+            mediaPlayer.reset();
             mediaPlayer.setDataSource(Cancion);
 
 
@@ -511,7 +571,7 @@ protected void onPause() {
     protected void onResume(){
         super.onResume();
         if(paused){
-            setController();
+            //setController();
             paused=false;
         }
     }
@@ -876,7 +936,6 @@ public void onPartialResult(Hypothesis hypothesis) {
     @Override
     public void onStop() {
 
-        //controller.hide();
                         /*
         Aplicacion en segundo plano (minimizada)
                         */
@@ -884,14 +943,6 @@ public void onPartialResult(Hypothesis hypothesis) {
         System.out.println("Estamos fuerisima!!!!!!!!!!!!!!!!!!");
         super.onStop();
 
-
-
-        /*
-        if (recognizer != null) {
-            recognizer.cancel();
-            recognizer.shutdown();
-        }
-        */
     }
 
     @Override
@@ -905,10 +956,8 @@ public void onPartialResult(Hypothesis hypothesis) {
     public void pause() {
        // playbackPaused=true;
         mediaPlayer.pause();
-
         recognizer.startListening(MENU_SEARCH);
     }
-
 
 
     @Override
@@ -931,6 +980,9 @@ public void onPartialResult(Hypothesis hypothesis) {
 
     @Override
     public boolean isPlaying() {
+
+
+
         return mediaPlayer.isPlaying();
 
     }
@@ -988,6 +1040,5 @@ public void onPartialResult(Hypothesis hypothesis) {
         controller.setEnabled(true);
         controller.show();
     }
-
     }
 
