@@ -70,13 +70,37 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
                 new String[]{ContactsContract.Data._ID, ContactsContract.Data.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER,
                         ContactsContract.CommonDataKinds.Phone.TYPE},
                 ContactsContract.Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE + "' AND "
-                        + ContactsContract.CommonDataKinds.Phone.NUMBER + " IS NOT NULL", null,
+                        + ContactsContract.CommonDataKinds.Phone.NUMBER + " IS NOT NULL" , null,
                 ContactsContract.Data.DISPLAY_NAME + " ASC");
 
 
         while(mCursor.moveToNext()) {
+
             datos.add(mCursor.getString(mCursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME))
-                     + "\n" + mCursor.getString(mCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)));
+                    + "\n" + mCursor.getString(mCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)));
+
+
+        }
+
+                        /*
+        Depuracion de la consulta para eliminar los
+        telefonos duplicados..... FALTA MEJORAR
+                        */
+
+        for(int i = 0; i<datos.size(); i++){
+
+
+
+            for (int j = 0; j<datos.size(); j++){
+
+                if(datos.get(j).equals(datos.get(i))){
+
+                    datos.remove(datos.get(j));
+
+
+                }
+            }
+
 
         }
             startManagingCursor(mCursor);

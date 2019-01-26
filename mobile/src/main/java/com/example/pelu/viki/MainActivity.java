@@ -182,24 +182,30 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         todo: llamamos a metodos de prueba, como inicir el repriductor, cambiar de activity para dictar y enviar por whatsupp
 
 
+
+                /*
+                Lista de telefonos
+*/
                 Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
                 startActivity(telefonos);
                 recognizer.stop();
                 finish();
-*/
-                 //creaMusica();
+
+
+              //creaMusica();
                // recognizer.stop();
+
+                /*
+                google maps
+
                 Intent telefonos = new Intent(getApplicationContext(), MapsActivity.class);
                 startActivity(telefonos);
-
+*/
             }
 
         });
 
-
-
     }
-
 
 
     @Override
