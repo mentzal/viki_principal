@@ -46,7 +46,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".SpotifyClas"></activity>
-        <activity android:name=".ListaTelefonos" />
+        <activity android:name=".ListaTelefonos"
+            android:windowSoftInputMode="stateHidden"
+            />
 
 
         <meta-data

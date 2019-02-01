@@ -192,15 +192,15 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
                 finish();
 
 
-              //creaMusica();
-               // recognizer.stop();
+           //  creaMusica();
+
 
                 /*
                 google maps
 
                 Intent telefonos = new Intent(getApplicationContext(), MapsActivity.class);
                 startActivity(telefonos);
-*/
+                */
             }
 
         });

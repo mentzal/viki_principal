@@ -84,16 +84,18 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
 
                         /*
         Depuracion de la consulta para eliminar los
-        telefonos duplicados..... FALTA MEJORAR
+        telefonos duplicados..... Mejoorado
                         */
 
         for(int i = 0; i<datos.size(); i++){
 
-
+            String split[] = datos.get(i).split("\n");
 
             for (int j = 0; j<datos.size(); j++){
 
-                if(datos.get(j).equals(datos.get(i))){
+                String splitj[] = datos.get(j).split("\n");
+                if(splitj[0].equals(split[0]) || datos.get(i).equals(datos.get(j))){
+
 
                     datos.remove(datos.get(j));
 
@@ -281,10 +283,16 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
             String text = texto ;// Replace with your message.
 
             String toNumber = telefono; // Replace with mobile phone number without +Sign or leading zeros.
-
-
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("http://api.whatsapp.com/send?phone="+toNumber +"&text="+text));
+            if(telefono.startsWith("+34")){
+                intent.setData(Uri.parse("http://api.whatsapp.com/send?phone="+toNumber +"&text="+text));
+            }
+            else{
+                intent.setData(Uri.parse("http://api.whatsapp.com/send?phone=+34"+toNumber +"&text="+text));
+            }
+
+
+
             startActivity(intent);
         }
         catch (Exception e){
