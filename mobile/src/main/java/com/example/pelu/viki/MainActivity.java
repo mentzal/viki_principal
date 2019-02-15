@@ -1,10 +1,12 @@
 package com.example.pelu.viki;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.media.MediaPlayer;
@@ -16,6 +18,7 @@ import android.view.MenuInflater;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.MediaController;
 import android.widget.MediaController.MediaPlayerControl;
 import android.net.Uri;
@@ -80,6 +83,9 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
     private String carpeta;
 
+    public boolean conectado;
+
+
 
 
     //debemos almacenar para mostrar en la lista, el nombre de la play list que esté en la config de usuario
@@ -107,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     private boolean estadoVoz = false;
 
 
+
     MailJob mail;
 
     /*variables dictado por voz */
@@ -114,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     private static final int RECOGNIZE_SPEECH_ACTIVITY = 1;
 
     private int colorFondoLista = Color.parseColor("#973b89c7");
+
 
 
     //TODO: NOTA--> BUSCAR PALABRA CLAVE EN LA REPRODUCCION DE LA MUSICA // -->
@@ -130,6 +138,8 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
                 */
         songList = new ArrayList<Song>();
         Dance = new ArrayList<Song>();
+
+
 
         MusicaNext = (MenuItem) findViewById(R.id.action_shuffle);
         MusicaStop = (MenuItem) findViewById(R.id.action_end);
@@ -155,6 +165,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         runRecognizerSetup();
 
         listaDispo.setVisibility(View.INVISIBLE);
+
 
 
                                     /*
@@ -185,14 +196,14 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
                 /*
                 Lista de telefonos
-*/
+
                 Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
                 startActivity(telefonos);
                 recognizer.stop();
                 finish();
+                */
 
-
-           //  creaMusica();
+            creaMusica();
 
 
                 /*
@@ -343,6 +354,8 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
 
     public void creaMusica() {
 
+
+
        // todo: crear uno por cada carpeta o directorio que queramos reproducir pasandolo como
        // todo: parámetro. O sacar todas las carpetas.
         /*
@@ -477,7 +490,6 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
             else if(directorio == false){
 
 
-
                 if(mediaPlayer != null){
 
                     mediaPlayer.stop();
@@ -501,6 +513,7 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
                     }
                     mediaPlayer.start();
                     //
+
                     recognizer.stop();
                     estadoVoz = false;
                     invalidateOptionsMenu(); //resetea el menu para cambiar estado del icono del micro.
@@ -609,6 +622,8 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
 
 @Override
 protected void onPause() {
+
+
    super.onPause();
     invalidateOptionsMenu();
     paused=true;
@@ -617,12 +632,16 @@ protected void onPause() {
 
     @Override
     protected void onResume(){
+
+        IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+
         super.onResume();
         invalidateOptionsMenu();
         if(paused){
             //setController();
             paused=false;
         }
+
     }
 
 
@@ -827,15 +846,7 @@ public void onPartialResult(Hypothesis hypothesis) {
 
                 recognizer.stop();
                 recognizer.startListening(MENU_SEARCH);
-                /*
-            } else if (hypothesis.getHypstr().equals("abre navegador")) {
-                // abre el navegador chorme //
-                open(MainActivity.this, "http://www.google.com");
-                textToSpeech.speak("abriendo navegador", TextToSpeech.QUEUE_FLUSH, null, null);
 
-                recognizer.stop();
-                recognizer.startListening(MENU_SEARCH);
-                */
             } else if (hypothesis.getHypstr().equals("abre whatsapp")) {
 
                 textToSpeech.speak("Abriendo", TextToSpeech.QUEUE_FLUSH, null, null);
@@ -907,12 +918,6 @@ public void onPartialResult(Hypothesis hypothesis) {
 
 
             }
-            /*
-            else if (hypothesis.getHypstr().equals("a dormir")) {
-
-                apagarViki();
-            }
-            */
 
             else if(hypothesis.getHypstr().equals("hola viki")){
                 textToSpeech.speak("hola", TextToSpeech.QUEUE_FLUSH, null, null);
@@ -1115,5 +1120,8 @@ public void onPartialResult(Hypothesis hypothesis) {
         controller.setEnabled(true);
         controller.show();
     }
-    }
+
+
+
+}
 
