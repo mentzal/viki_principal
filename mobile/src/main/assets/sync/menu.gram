@@ -4,7 +4,7 @@ grammar mymenu;
 
 public <smart> = (encender ordenador | abre navegador | abre whatsapp
                   |abre spotify |abre música|para música |cierra música
-                  |música dance |a dormir |hola viki |loquillo | abre loquillo |abre playlist|manda correo|enviar correo);
+                  |música dance |a dormir |hola viki |loquillo | abre loquillo |abre playlist|manda correo|enviar correo|mostrar);
 
 
 

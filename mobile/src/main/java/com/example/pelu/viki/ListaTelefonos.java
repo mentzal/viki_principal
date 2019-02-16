@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
@@ -234,32 +235,19 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
 
                     if(voz == false){
 
+                        /*
+                        todo: pasar parámetro al main para ejecutar el método whatsap con las parámetros
+                         */
+
                         textoGrabado = strSpeech2Text;
-
-                                            /*
-                        Abre whatsup y vuelve a la activity principal
-                                            */
-
-                        new AsyncTask<Void, Void, Exception>() {
-                            @Override
-                            protected Exception doInBackground(Void... params) {
-                                try {
-                                    openWhatsApp(textoGrabado,part2);
-
-
-
-                                    finish();
-                                } catch (Exception e) {
-
-                                    return e;
-                                }
-                                return null;
-                            }
-
-                        }.execute();
 
                         Intent principal = new Intent(getApplicationContext(), MainActivity.class);
                         startActivity(principal);
+
+                        finish();
+
+                        openWhatsApp(textoGrabado,part2);
+
 
                     }
                     else if (voz == true){

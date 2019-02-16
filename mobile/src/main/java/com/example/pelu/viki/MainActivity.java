@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
 
     private SpeechRecognizer recognizer;
-    private static final String KEYPHRASE = "hola";
+    private static final String KEYPHRASE = "hola viki";
     private static final String MENU_SEARCH = "accede al menú";
     private static final String KWS_SEARCH = "hola";
     private static final String NOMBRE_VIKI = "viki";
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         PanelMusica = (View) findViewById(R.id.view);
 
 
-        listaDispo.setBackgroundColor(255);
+        //listaDispo.setBackgroundColor(255);
         listaDispo.setVisibility(View.VISIBLE);
 
         spotifyTabla.setVisibility(View.INVISIBLE);
@@ -196,14 +196,15 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
                 /*
                 Lista de telefonos
-
+                */
                 Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
                 startActivity(telefonos);
                 recognizer.stop();
                 finish();
-                */
 
-            creaMusica();
+
+           // creaMusica();
+
 
 
                 /*
@@ -377,7 +378,7 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
 
 
         final String Cancion;
-        listaDispo.setBackgroundColor(colorFondoLista);
+        //listaDispo.setBackgroundColor(colorFondoLista);
         final String PATH_TO_FILE = "/sdcard/Music/";
 
 
@@ -395,7 +396,7 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
 
                 TextView ListItemShow = (TextView) view.findViewById(android.R.id.text1);
 
-                ListItemShow.setTextColor(Color.parseColor("#FFFFFF"));
+                ListItemShow.setTextColor(Color.parseColor("#FFFFFF99"));
 
 
                 return view;
@@ -445,7 +446,7 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
               final String Cancion;
 
 
-              listaDispo.setBackgroundColor(colorFondoLista);
+              //listaDispo.setBackgroundColor(colorFondoLista);
 
 
             if(directorio == true){
@@ -697,14 +698,14 @@ private void setupRecognizer(File assetsDir) throws IOException {
            .getRecognizer();
    recognizer.addListener(this);
    // Create keyword-activation search.
-   recognizer.addKeyphraseSearch(KWS_SEARCH, NOMBRE_VIKI);
+   recognizer.addKeyphraseSearch(KWS_SEARCH,KEYPHRASE );
 
    //todo: utilizamos el archivo de gramática para nvegar por él si queremos //
    // Create your custom grammar-based search
 
    File menuGrammar = new File(assetsDir, "menu.gram");
    recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
-   recognizer.addGrammarSearch(LISTASPOTY, menuGrammar);
+  // recognizer.addGrammarSearch(LISTASPOTY, menuGrammar);
 
 
 }
@@ -952,8 +953,19 @@ public void onPartialResult(Hypothesis hypothesis) {
 
             }
 
-        }
+                                     /*
+            Reinicia la aplicacion maximizandola si está minimizada
+                                    */
 
+            else if(hypothesis.getHypstr().equals("mostrar")){
+
+                Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.example.pelu.viki");
+                startActivity(launchIntent);
+
+              super.finish();
+
+            }
+        }
     }
 
     @Override

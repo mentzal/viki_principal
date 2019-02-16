@@ -36,7 +36,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:windowSoftInputMode="stateHidden">
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:theme="@style/VikiThemme">
 
             <!-- Se añaden estas dos líneas para ponerla como clase principal¡ -->
             <intent-filter>
@@ -48,7 +50,9 @@
         <activity android:name=".SpotifyClas" />
         <activity
             android:name=".ListaTelefonos"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            android:configChanges="orientation|keyboardHidden"
+            android:theme="@style/VikiThemme" />
 
         <meta-data
             android:name="com.google.android.gms.car.application"
