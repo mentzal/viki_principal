@@ -4,6 +4,7 @@ package com.example.pelu.viki;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,11 +19,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -109,10 +112,28 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
             startManagingCursor(mCursor);
 
 
-        adapters = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_2, android.R.id.text1, datos);
+        adapters = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_2, android.R.id.text1, datos){
+
+                        /*
+            ESTILO TEXTVIEW DE LA LISTA
+                    */
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+
+
+                View view = super.getView(position, convertView, parent);
+
+                TextView ListItemShow = (TextView) view.findViewById(android.R.id.text1);
+
+                ListItemShow.setTextColor(Color.parseColor("#FFFFFF99"));
+
+
+                return view;
+            }
+
+        };
 
         listaTelefonos.setAdapter(adapters);
-
         listaTelefonos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -236,17 +257,18 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
                     if(voz == false){
 
                         /*
-                        todo: pasar parámetro al main para ejecutar el método whatsap con las parámetros
+                        todo: pasar parámetro al main para ejecutar el método whatsap con los parámetros
                          */
 
                         textoGrabado = strSpeech2Text;
 
                         Intent principal = new Intent(getApplicationContext(), MainActivity.class);
+                        principal.putExtra("texto", textoGrabado);
+                        principal.putExtra("numero", part2);
                         startActivity(principal);
-
                         finish();
 
-                        openWhatsApp(textoGrabado,part2);
+                       // openWhatsApp(textoGrabado,part2);
 
 
                     }
@@ -263,30 +285,7 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
         }
     }
 
-    /*
-        Abre whatsapp y envía mensaje al numero indicado
-                             */
-    public void openWhatsApp(String texto, String telefono){
-        try {
-            String text = texto ;// Replace with your message.
 
-            String toNumber = telefono; // Replace with mobile phone number without +Sign or leading zeros.
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            if(telefono.startsWith("+34")){
-                intent.setData(Uri.parse("http://api.whatsapp.com/send?phone="+toNumber +"&text="+text));
-            }
-            else{
-                intent.setData(Uri.parse("http://api.whatsapp.com/send?phone=+34"+toNumber +"&text="+text));
-            }
-
-
-
-            startActivity(intent);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-    }
 
     @Override
 

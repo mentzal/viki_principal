@@ -10,5 +10,7 @@
     <color name="background_material_light">#bebcbc</color>
     <color name="navigationBar">#ce7a4f</color>
     <color name="Fondolista">#9b5151</color>
+    <color name="Spotify">#db65a94a</color>
+    <color name="Musica">#b3e49449</color>
 
 </resources>

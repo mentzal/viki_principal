@@ -1,24 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    >
+    android:background="@color/browser_actions_title_color"
+    android:orientation="vertical">
 
     <!-- Editext for Search -->
     <EditText
         android:id="@+id/inputSearch"
         android:layout_width="fill_parent"
         android:layout_height="103dp"
+        android:background="@color/browser_actions_title_color"
         android:hint="PULSA PARA BUSCAR"
         android:inputType="textVisiblePassword"
-        android:textAlignment="center" />
+        android:textAlignment="center"
+        android:textColor="@android:color/holo_orange_dark"
+        android:textSize="24sp" />
 
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/BackgroundList"
+        android:background="#FF330000"
+        android:divider="@android:color/darker_gray"
         android:dividerHeight="3dp" />
 
 </LinearLayout>

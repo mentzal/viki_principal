@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     private boolean albumes =  false;
     private boolean artistas =  false;
     private boolean estadoVoz = false;
-
+    public boolean whatsapp = true;
 
 
     MailJob mail;
@@ -119,8 +119,9 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     /*variables dictado por voz */
     TextView grabar;
     private static final int RECOGNIZE_SPEECH_ACTIVITY = 1;
-
     private int colorFondoLista = Color.parseColor("#973b89c7");
+    String telefonos;
+    String textos;
 
 
 
@@ -132,6 +133,10 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         super.onCreate(state);
         setContentView(R.layout.activity_main);
 
+        if(whatsapp == true){
+            System.out.println("dentro !!!!!!");
+            openWhatsApp();
+        }
 
                 /*
          lista canciones
@@ -193,19 +198,14 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         todo: llamamos a metodos de prueba, como inicir el repriductor, cambiar de activity para dictar y enviar por whatsupp
 
 
-
                 /*
                 Lista de telefonos
                 */
+                whatsapp = true;
                 Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
                 startActivity(telefonos);
                 recognizer.stop();
                 finish();
-
-
-           // creaMusica();
-
-
 
                 /*
                 google maps
@@ -217,8 +217,30 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
         });
 
-    }
+        final Button button2 = findViewById(R.id.button2);
+        button2.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
 
+                textToSpeech.speak("abriendo", TextToSpeech.QUEUE_FLUSH, null, null);
+                spotifyTabla.setVisibility(View.VISIBLE);
+                Spotypanel = true;
+
+            }
+
+        });
+
+
+        final Button button3 = findViewById(R.id.button3);
+        button3.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+
+                creaMusica();
+            }
+
+        });
+
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -1133,6 +1155,35 @@ public void onPartialResult(Hypothesis hypothesis) {
         controller.show();
     }
 
+
+    /*
+       Abre whatsapp y envía mensaje al numero indicado
+                            */
+    public void openWhatsApp(){
+        try {
+
+            telefonos = (String) getIntent().getExtras().getSerializable("numero");
+            textos = (String) getIntent().getExtras().getSerializable("texto");
+
+            String text = textos;// Replace with your message.
+
+            String toNumber = telefonos; // Replace with mobile phone number without +Sign or leading zeros.
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            if(telefonos.startsWith("+34")){
+                intent.setData(Uri.parse("http://api.whatsapp.com/send?phone="+toNumber +"&text="+text));
+            }
+            else{
+                intent.setData(Uri.parse("http://api.whatsapp.com/send?phone=+34"+toNumber +"&text="+text));
+            }
+
+
+            startActivity(intent);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        whatsapp = false;
+    }
 
 
 }
