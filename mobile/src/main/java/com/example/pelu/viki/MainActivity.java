@@ -1049,7 +1049,7 @@ public void onPartialResult(Hypothesis hypothesis) {
                 recognizer.stop();
                 recognizer.startListening(MENU_SEARCH);
             }
-            
+
                                      /*
             Reinicia la aplicacion maximizandola si está minimizada
                                     */
