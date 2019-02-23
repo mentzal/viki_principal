@@ -34,17 +34,17 @@
                     android:id="@+id/button8"
                     android:layout_width="154dp"
                     android:layout_height="match_parent"
-                    android:backgroundTint="@color/colorPrimary"
+                    android:backgroundTint="@color/barratareas"
                     android:text="Play List"
-                    android:textColor="@color/common_google_signin_btn_text_dark_default" />
+                    android:textColor="#FFFFFF99" />
 
                 <Button
                     android:id="@+id/button7"
                     android:layout_width="154dp"
                     android:layout_height="155dp"
-                    android:backgroundTint="@color/colorPrimary"
+                    android:backgroundTint="@color/barratareas"
                     android:text="Canciones"
-                    android:textColor="@color/common_google_signin_btn_text_dark_default" />
+                    android:textColor="@android:color/background_dark" />
 
             </TableRow>
 
@@ -56,17 +56,17 @@
                     android:id="@+id/button10"
                     android:layout_width="154dp"
                     android:layout_height="155dp"
-                    android:backgroundTint="@color/colorPrimary"
+                    android:backgroundTint="@color/barratareas"
                     android:text="Álbumes"
-                    android:textColor="@color/common_google_signin_btn_text_dark_default" />
+                    android:textColor="@android:color/holo_orange_dark" />
 
                 <Button
                     android:id="@+id/button9"
                     android:layout_width="154dp"
                     android:layout_height="match_parent"
-                    android:backgroundTint="@color/colorPrimary"
+                    android:backgroundTint="@color/barratareas"
                     android:text="Artistas"
-                    android:textColor="@color/common_google_signin_btn_text_dark_default" />
+                    android:textColor="@android:color/background_light" />
 
             </TableRow>
 

@@ -223,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
                 textToSpeech.speak("abriendo", TextToSpeech.QUEUE_FLUSH, null, null);
                 spotifyTabla.setVisibility(View.VISIBLE);
+                listaDispo.setVisibility(View.INVISIBLE);
                 Spotypanel = true;
 
             }
@@ -239,6 +240,29 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
             }
 
         });
+
+
+        final Button button8 = findViewById(R.id.button8);
+        button8.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+        listaRepord = true;  // para saber si la url pertenece a playlist..> para el método "abrespoty" //
+        spoty_playLists = true;
+        dance = false;
+        creaMusica();
+
+        recognizer.stop();
+        recognizer.startListening(MENU_SEARCH);
+
+
+        spoty_playLists = true;
+        creaMusica();
+
+
+            }
+
+        });
+
 
     }
 
@@ -729,9 +753,7 @@ private void setupRecognizer(File assetsDir) throws IOException {
    recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
   // recognizer.addGrammarSearch(LISTASPOTY, menuGrammar);
 
-
 }
-
 
 @Override
 public void onBeginningOfSpeech() {
@@ -757,7 +779,6 @@ public void onEndOfSpeech() {
        switchSearch(KWS_SEARCH);
 
 }
-
 
 @Override
 public void onPartialResult(Hypothesis hypothesis) {
@@ -885,6 +906,7 @@ public void onPartialResult(Hypothesis hypothesis) {
 
                 textToSpeech.speak("abriendo", TextToSpeech.QUEUE_FLUSH, null, null);
                 spotifyTabla.setVisibility(View.VISIBLE);
+                listaDispo.setVisibility(View.INVISIBLE);
                 Spotypanel = true;
 
             }
@@ -1032,14 +1054,7 @@ public void onPartialResult(Hypothesis hypothesis) {
 
     @Override
     public void onStop() {
-
-                        /*
-        Aplicacion en segundo plano (minimizada)
-                        */
-        maximizado = true; //intentamos traerla al frente pero no funciona //
-        System.out.println("Estamos fuerisima!!!!!!!!!!!!!!!!!!");
         super.onStop();
-
     }
 
     @Override
@@ -1184,7 +1199,6 @@ public void onPartialResult(Hypothesis hypothesis) {
         }
         whatsapp = false;
     }
-
 
 }
 
