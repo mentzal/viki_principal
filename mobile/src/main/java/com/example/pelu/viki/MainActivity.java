@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         button3.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
-
+                spotifyTabla.setVisibility(View.INVISIBLE);
                 creaMusica();
             }
 
@@ -249,6 +249,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         listaRepord = true;  // para saber si la url pertenece a playlist..> para el método "abrespoty" //
         spoty_playLists = true;
         dance = false;
+
         creaMusica();
 
         recognizer.stop();
@@ -281,6 +282,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
                 }
 
              listaDispo.setVisibility(View.INVISIBLE);
+             spotifyTabla.setVisibility(View.INVISIBLE);
 
 
                invalidateOptionsMenu();
