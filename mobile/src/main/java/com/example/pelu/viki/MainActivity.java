@@ -250,15 +250,10 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         spoty_playLists = true;
         dance = false;
 
-        creaMusica();
+        creaSpoty();
 
         recognizer.stop();
         recognizer.startListening(MENU_SEARCH);
-
-
-        spoty_playLists = true;
-        creaMusica();
-
 
             }
 
@@ -399,10 +394,74 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
         dialog.show();
     }
 
+    public void creaSpoty(){
+
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems) {
+
+
+            /*
+              ESTILO TEXTVIEW DE LA LISTA
+                      */
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+
+
+                View view = super.getView(position, convertView, parent);
+
+                TextView ListItemShow = (TextView) view.findViewById(android.R.id.text1);
+
+                ListItemShow.setTextColor(Color.parseColor("#FFFFFF99"));
+
+
+                return view;
+            }
+
+        };
+
+            try{
+
+
+                adapter.clear();
+                for(int i = 0; i<Playlist.length; i++){
+
+                    adapter.add(tituloPlayList[i].toString());
+                    adapter.add(Playlist[i].toString());
+
+
+                }
+                spotifyTabla.setVisibility(View.INVISIBLE);
+            }catch (Exception e){
+
+                showAlert();
+            }
+
+        // Accion para realizar al pulsar sobre un item de la lista
+        listaDispo.setOnItemClickListener(  new AdapterView.OnItemClickListener() {
+
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                System.out.println(adapter.getItem(i));
+
+                if (spoty_playLists == true) {
+
+                    abrespoty(adapter.getItem(i));
+                }
+            }
+        });
+
+
+        listaDispo.setAdapter(adapter);
+        listaDispo.setVisibility(View.VISIBLE);
+        recognizer.stop();
+        recognizer.startListening(MENU_SEARCH);
+
+    }
+
 
 
     public void creaMusica() {
-
 
 
        // todo: crear uno por cada carpeta o directorio que queramos reproducir pasandolo como
@@ -918,14 +977,11 @@ public void onPartialResult(Hypothesis hypothesis) {
                 listaRepord = true;  // para saber si la url pertenece a playlist..> para el método "abrespoty" //
                 spoty_playLists = true;
                 dance = false;
-                creaMusica();
+
+                creaSpoty();
 
                 recognizer.stop();
                 recognizer.startListening(MENU_SEARCH);
-
-
-                spoty_playLists = true;
-                creaMusica();
 
             }
 
@@ -980,7 +1036,6 @@ public void onPartialResult(Hypothesis hypothesis) {
             }
 
 
-
             else if(hypothesis.getHypstr().equals("manda correo")){
                 textToSpeech.speak("Enviando correo", TextToSpeech.QUEUE_FLUSH, null, null);
 
@@ -994,11 +1049,7 @@ public void onPartialResult(Hypothesis hypothesis) {
                 recognizer.stop();
                 recognizer.startListening(MENU_SEARCH);
             }
-
-            else if(hypothesis.getHypstr().equals("enviar correo")){
-
-            }
-
+            
                                      /*
             Reinicia la aplicacion maximizandola si está minimizada
                                     */
