@@ -104,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     View PanelMusica;
 
 
-    private boolean dance = false;
     private boolean spoty_playLists = false;
     private boolean Spotypanel = false;
     private boolean listaRepord =  false;
@@ -119,7 +118,6 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     /*variables dictado por voz */
     TextView grabar;
     private static final int RECOGNIZE_SPEECH_ACTIVITY = 1;
-    private int colorFondoLista = Color.parseColor("#973b89c7");
     String telefonos;
     String textos;
 
@@ -134,7 +132,6 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         setContentView(R.layout.activity_main);
 
         if(whatsapp == true){
-            System.out.println("dentro !!!!!!");
             openWhatsApp();
         }
 
@@ -248,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
         listaRepord = true;  // para saber si la url pertenece a playlist..> para el método "abrespoty" //
         spoty_playLists = true;
-        dance = false;
+
 
         creaSpoty();
 
@@ -976,8 +973,6 @@ public void onPartialResult(Hypothesis hypothesis) {
 
                 listaRepord = true;  // para saber si la url pertenece a playlist..> para el método "abrespoty" //
                 spoty_playLists = true;
-                dance = false;
-
                 creaSpoty();
 
                 recognizer.stop();
@@ -990,7 +985,7 @@ public void onPartialResult(Hypothesis hypothesis) {
                                 /*
                   reproduce una cancion selecionada
                                  */
-                dance = false;
+
                 creaMusica();
 
                 // musica = true;
@@ -1001,7 +996,7 @@ public void onPartialResult(Hypothesis hypothesis) {
             }
 
              else if (hypothesis.getHypstr().equals("cierra música")) {
-                dance = false;
+
                 controller.hide();
                 estadoVoz = false;
                 listaDispo.setVisibility(View.INVISIBLE);
@@ -1010,7 +1005,7 @@ public void onPartialResult(Hypothesis hypothesis) {
 
             //todo: hacer lista dinámica...par amostrar unas canciones u otras ... sacar del oncreate //
             else if (hypothesis.getHypstr().equals("música dance")) {
-                dance = true;
+
                 // mediaPlayer.stop();
                 creaMusica();
                 recognizer.stop();
@@ -1056,8 +1051,8 @@ public void onPartialResult(Hypothesis hypothesis) {
 
             else if(hypothesis.getHypstr().equals("mostrar")){
 
-                Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.example.pelu.viki");
-                startActivity(launchIntent);
+                Intent Main = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(Main);
 
               super.finish();
 

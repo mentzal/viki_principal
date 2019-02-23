@@ -65,8 +65,6 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
 
 
 
-
-
         Cursor mCursor = getContentResolver().query(
 
                 ContactsContract.Data.CONTENT_URI,
@@ -298,8 +296,8 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
         MenuItem salir = menu.findItem(R.id.action_end);
 
 
-        sufle.setVisible(false);
-        salir.setVisible(false);
+        sufle.setVisible(true);
+        salir.setVisible(true);
 
         MenuItem off = menu.findItem(R.id.estadoVikiOff);
         MenuItem on = menu.findItem(R.id.estadoVikiOn);
@@ -314,8 +312,23 @@ public class ListaTelefonos extends AppCompatActivity implements SearchView.OnQu
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
+        switch (item.getItemId()) {
+
+            case R.id.action_shuffle:
+                Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.example.pelu.viki");
+                startActivity(launchIntent);
+
+                super.finish();
 
 
+                break;
+            case R.id.action_end:
+                System.exit(0);
+
+                break;
+
+
+        }
         return super.onOptionsItemSelected(item);
     }
 
