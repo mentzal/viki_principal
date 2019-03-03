@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     private static final String MENU_SEARCH = "accede al menú";
     private static final String KWS_SEARCH = "hola";
     private static final String NOMBRE_VIKI = "viki";
-    private static final String LISTASPOTY = "loquillo";
+    private static final String MENU_SPOTY = "abre spotify";
 
     private TextToSpeech textToSpeech;
     private MediaPlayer mediaPlayer;
@@ -78,11 +78,10 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     private ArrayList<Song> Dance;
 
     private boolean paused=false, playbackPaused=false;
-    private boolean maximizado;
     private boolean directorio;
 
     private String carpeta;
-
+    public boolean dentroSpoty;
     public boolean conectado;
 
 
@@ -116,8 +115,6 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     MailJob mail;
 
     /*variables dictado por voz */
-    TextView grabar;
-    private static final int RECOGNIZE_SPEECH_ACTIVITY = 1;
     String telefonos;
     String textos;
 
@@ -809,7 +806,9 @@ private void setupRecognizer(File assetsDir) throws IOException {
 
    File menuGrammar = new File(assetsDir, "menu.gram");
    recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
-  // recognizer.addGrammarSearch(LISTASPOTY, menuGrammar);
+
+    File musicaGramar = new File(assetsDir, "musica.gram");
+    recognizer.addGrammarSearch(MENU_SPOTY, musicaGramar);
 
 }
 
@@ -851,21 +850,158 @@ public void onPartialResult(Hypothesis hypothesis) {
 
    String text = hypothesis.getHypstr();
 
+                            /*
+Accedemos al archivo de palabras según la palabra clave que digamos
+                    REVISAR
+                        */
+
 
    if (text.equals(KEYPHRASE)) {
-       recognizer.stop();
+
        estadoVoz = false;
        switchSearch(MENU_SEARCH);
-   } else
-
-   {
-       recognizer.stop();
-       recognizer.startListening(MENU_SEARCH);
-       System.out.println(hypothesis.getHypstr() + " Hypotesis Onpartial");
 
    }
 
+  else if(text.equals(MENU_SPOTY)){
+
+       estadoVoz = false;
+       switchSearch(MENU_SPOTY);
+   }
+
+
 }
+
+
+    @Override
+    public void onResult(Hypothesis hypothesis) {
+
+        boolean listalokillo = false;
+
+        if (hypothesis != null) {
+
+
+            System.out.println(hypothesis.getHypstr() + "hipotesis");
+
+
+
+            if (hypothesis.getHypstr().equals("encender ordenador")) {
+                textToSpeech.speak("encendiendo", TextToSpeech.QUEUE_FLUSH, null, null);
+
+                new Thread(new Runnable() {
+                    public void run() {
+                        wakeup("192.168.1.112", "309C238975FF");
+                    }
+                }).start();
+
+                recognizer.stop();
+                recognizer.startListening(MENU_SEARCH);
+
+            } else if (hypothesis.getHypstr().equals("abre whatsapp")) {
+
+                textToSpeech.speak("Abriendo", TextToSpeech.QUEUE_FLUSH, null, null);
+                Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
+                startActivity(telefonos);
+
+                recognizer.stop();
+                estadoVoz = false;
+                finish();
+                // recognizer.startListening(MENU_SEARCH);
+
+            } else if (hypothesis.getHypstr().equals("abre spotify")) {
+
+                textToSpeech.speak("abriendo", TextToSpeech.QUEUE_FLUSH, null, null);
+                spotifyTabla.setVisibility(View.VISIBLE);
+                listaDispo.setVisibility(View.INVISIBLE);
+                Spotypanel = true;
+                recognizer.stop();
+                recognizer.startListening(MENU_SPOTY);
+
+            }
+
+            else if(hypothesis.getHypstr().equals("abre playlist") && Spotypanel == true){
+
+                listaRepord = true;  // para saber si la url pertenece a playlist..> para el método "abrespoty" //
+                spoty_playLists = true;
+                creaSpoty();
+                recognizer.stop();
+                recognizer.startListening(MENU_SPOTY);
+
+            }
+
+            else if (hypothesis.getHypstr().equals("abre música")) {
+
+                                /*
+                  reproduce una cancion selecionada
+                                 */
+
+                creaMusica();
+
+                // musica.gram = true;
+                textToSpeech.speak("Abriendo música", TextToSpeech.QUEUE_FLUSH, null, null);
+                recognizer.stop();
+                estadoVoz = false;
+
+            }
+
+            else if (hypothesis.getHypstr().equals("cierra música")) {
+
+                controller.hide();
+                estadoVoz = false;
+                listaDispo.setVisibility(View.INVISIBLE);
+                recognizer.startListening(MENU_SEARCH);
+            }
+
+            //todo: hacer lista dinámica...par amostrar unas canciones u otras ... sacar del oncreate //
+            else if (hypothesis.getHypstr().equals("música dance")) {
+
+                // mediaPlayer.stop();
+                creaMusica();
+                recognizer.stop();
+
+
+                //  lista.setVisibility(View.INVISIBLE);
+                recognizer.startListening(MENU_SEARCH);
+
+
+            }
+
+            else if(hypothesis.getHypstr().equals("hola viki")){
+                textToSpeech.speak("hola", TextToSpeech.QUEUE_FLUSH, null, null);
+                recognizer.stop();
+                recognizer.startListening(MENU_SEARCH);
+            }
+
+            else if(hypothesis.getHypstr().equals("manda correo")){
+                textToSpeech.speak("Enviando correo", TextToSpeech.QUEUE_FLUSH, null, null);
+
+                 /*
+        ENVIO DE CORREO DE PRUEBA
+        En la cuenta de correo de gmail, permitir acceso a aplicaciones no seguras.
+                */
+                new MailJob("belaklord@gmail.com", "A968908054").execute(
+                        new MailJob.Mail("belaklord@gmail.com", "belaklord@gmail.com", "subjeto", "contenido") );
+
+                recognizer.stop();
+                recognizer.startListening(MENU_SEARCH);
+            }
+
+                                     /*
+            Reinicia la aplicacion maximizandola si está minimizada
+                                    */
+
+            else if(hypothesis.getHypstr().equals("mostrar")){
+
+                Intent Main = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(Main);
+
+                super.finish();
+
+            }
+        }
+
+    }
+
                                     /*
                             ENCENDIDO REMOTO
                                     */
@@ -925,140 +1061,6 @@ public void onPartialResult(Hypothesis hypothesis) {
              */
 
 
-    @Override
-    public void onResult(Hypothesis hypothesis) {
-
-         boolean listalokillo = false;
-
-        if (hypothesis != null) {
-
-
-            System.out.println(hypothesis.getHypstr() + "hipotesis");
-
-
-
-            if (hypothesis.getHypstr().equals("encender ordenador")) {
-                textToSpeech.speak("encendiendo", TextToSpeech.QUEUE_FLUSH, null, null);
-
-                new Thread(new Runnable() {
-                    public void run() {
-                        wakeup("192.168.1.112", "309C238975FF");
-                    }
-                }).start();
-
-                recognizer.stop();
-                recognizer.startListening(MENU_SEARCH);
-
-            } else if (hypothesis.getHypstr().equals("abre whatsapp")) {
-
-                textToSpeech.speak("Abriendo", TextToSpeech.QUEUE_FLUSH, null, null);
-                Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
-                startActivity(telefonos);
-
-                recognizer.stop();
-                estadoVoz = false;
-                finish();
-               // recognizer.startListening(MENU_SEARCH);
-
-            } else if (hypothesis.getHypstr().equals("abre spotify")) {
-
-                textToSpeech.speak("abriendo", TextToSpeech.QUEUE_FLUSH, null, null);
-                spotifyTabla.setVisibility(View.VISIBLE);
-                listaDispo.setVisibility(View.INVISIBLE);
-                Spotypanel = true;
-
-            }
-
-            else if(hypothesis.getHypstr().equals("abre playlist") && Spotypanel == true){
-
-                listaRepord = true;  // para saber si la url pertenece a playlist..> para el método "abrespoty" //
-                spoty_playLists = true;
-                creaSpoty();
-
-                recognizer.stop();
-                recognizer.startListening(MENU_SEARCH);
-
-            }
-
-             else if (hypothesis.getHypstr().equals("abre música")) {
-
-                                /*
-                  reproduce una cancion selecionada
-                                 */
-
-                creaMusica();
-
-                // musica = true;
-                textToSpeech.speak("Abriendo música", TextToSpeech.QUEUE_FLUSH, null, null);
-                recognizer.stop();
-                estadoVoz = false;
-
-            }
-
-             else if (hypothesis.getHypstr().equals("cierra música")) {
-
-                controller.hide();
-                estadoVoz = false;
-                listaDispo.setVisibility(View.INVISIBLE);
-                recognizer.startListening(MENU_SEARCH);
-            }
-
-            //todo: hacer lista dinámica...par amostrar unas canciones u otras ... sacar del oncreate //
-            else if (hypothesis.getHypstr().equals("música dance")) {
-
-                // mediaPlayer.stop();
-                creaMusica();
-                recognizer.stop();
-
-
-                //  lista.setVisibility(View.INVISIBLE);
-                recognizer.startListening(MENU_SEARCH);
-
-
-            }
-
-            else if(hypothesis.getHypstr().equals("hola viki")){
-                textToSpeech.speak("hola", TextToSpeech.QUEUE_FLUSH, null, null);
-                recognizer.stop();
-                recognizer.startListening(MENU_SEARCH);
-            }
-            else if(hypothesis.getHypstr().equals("hola viki")&& maximizado == true){
-
-                Intent principal = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(principal);
-                System.out.println("ESTAMOS DENTRO !!!!!!!!!");
-
-            }
-
-
-            else if(hypothesis.getHypstr().equals("manda correo")){
-                textToSpeech.speak("Enviando correo", TextToSpeech.QUEUE_FLUSH, null, null);
-
-                 /*
-        ENVIO DE CORREO DE PRUEBA
-        En la cuenta de correo de gmail, permitir acceso a aplicaciones no seguras.
-                */
-                  new MailJob("belaklord@gmail.com", "A968908054").execute(
-                  new MailJob.Mail("belaklord@gmail.com", "belaklord@gmail.com", "subjeto", "contenido") );
-
-                recognizer.stop();
-                recognizer.startListening(MENU_SEARCH);
-            }
-
-                                     /*
-            Reinicia la aplicacion maximizandola si está minimizada
-                                    */
-
-            else if(hypothesis.getHypstr().equals("mostrar")){
-
-                Intent Main = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(Main);
-
-              super.finish();
-
-            }
-        }
-    }
 
     @Override
     public void onError(Exception e) {

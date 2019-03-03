@@ -1,0 +1,9 @@
+#JSGF V1.0;
+
+grammar musica;
+
+public <smart> = (abre playlist | abre canciones | abre albumes | abre artistas);
+
+
+
+
