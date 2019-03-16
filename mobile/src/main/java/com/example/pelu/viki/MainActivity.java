@@ -55,6 +55,9 @@ import java.util.Random;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 
 public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsphinx.RecognitionListener, TextToSpeech.OnInitListener, MediaPlayerControl {
 
@@ -65,27 +68,20 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     private static final String KWS_SEARCH = "hola";
     private static final String NOMBRE_VIKI = "viki";
     private static final String MENU_SPOTY = "abre spotify";
-
     private TextToSpeech textToSpeech;
     private MediaPlayer mediaPlayer;
-    ArrayList<String> listItems = new ArrayList<String>();
 
-    /*
-    variable de instancia mediacontroller para el control de las canciones
-     */
+    ArrayList<String> listItems = new ArrayList<String>();
+    ArrayList<String> listaCarpetas = new ArrayList<String>();
+
     private MusicController controller;
     private ArrayList<Song> songList;
     private ArrayList<Song> Dance;
-
     private boolean paused=false, playbackPaused=false;
     private boolean directorio;
-
     private String carpeta;
     public boolean dentroSpoty;
     public boolean conectado;
-
-
-
 
     //debemos almacenar para mostrar en la lista, el nombre de la play list que esté en la config de usuario
     //TODO: los datos mejor en base de datos ¿?? //
@@ -111,13 +107,11 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     private boolean estadoVoz = false;
     public boolean whatsapp = true;
 
-
     MailJob mail;
 
     /*variables dictado por voz */
     String telefonos;
     String textos;
-
 
 
     //TODO: NOTA--> BUSCAR PALABRA CLAVE EN LA REPRODUCCION DE LA MUSICA // -->
@@ -127,6 +121,8 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
         super.onCreate(state);
         setContentView(R.layout.activity_main);
+       
+
 
         if(whatsapp == true){
             openWhatsApp();
@@ -272,10 +268,9 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
              listaDispo.setVisibility(View.INVISIBLE);
              spotifyTabla.setVisibility(View.INVISIBLE);
-
+             Spotypanel = false;
 
                invalidateOptionsMenu();
-
 
                 break;
             case R.id.action_end:
@@ -477,11 +472,7 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
         SongAdapter songAdt = new SongAdapter(this, songList);
         listaDispo.setAdapter(songAdt);
 
-
-        final String Cancion;
-        //listaDispo.setBackgroundColor(colorFondoLista);
         final String PATH_TO_FILE = "/sdcard/Music/";
-
 
 
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems) {
@@ -809,7 +800,6 @@ private void setupRecognizer(File assetsDir) throws IOException {
 
     File musicaGramar = new File(assetsDir, "musica.gram");
     recognizer.addGrammarSearch(MENU_SPOTY, musicaGramar);
-
 }
 
 @Override
@@ -858,21 +848,20 @@ Accedemos al archivo de palabras según la palabra clave que digamos
 
    if (text.equals(KEYPHRASE)) {
 
-       estadoVoz = false;
-       switchSearch(MENU_SEARCH);
+    if(Spotypanel == false){
 
+        estadoVoz = false;
+        switchSearch(MENU_SEARCH);
+    }
+
+    if(Spotypanel == true){
+
+        estadoVoz = false;
+        switchSearch(MENU_SPOTY);
+    }
    }
-
-  else if(text.equals(MENU_SPOTY)){
-
-       estadoVoz = false;
-       switchSearch(MENU_SPOTY);
-   }
-
 
 }
-
-
     @Override
     public void onResult(Hypothesis hypothesis) {
 
