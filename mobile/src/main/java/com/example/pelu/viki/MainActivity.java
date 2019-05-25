@@ -1,28 +1,29 @@
 package com.example.pelu.viki;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.IBinder;
-import android.preference.PreferenceManager;
+
+import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.view.MenuInflater;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.AdapterView;
-import android.widget.EditText;
-import android.widget.MediaController;
 import android.widget.MediaController.MediaPlayerControl;
 import android.net.Uri;
 import android.os.AsyncTask;
+
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
@@ -38,6 +39,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -48,19 +54,29 @@ import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
+import jxl.Cell;
+import jxl.Sheet;
+import jxl.Workbook;
+import jxl.read.biff.BiffException;
+import jxl.write.Label;
+import jxl.write.Number;
+import jxl.write.NumberFormat;
+import jxl.write.WritableCellFormat;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+import jxl.write.WriteException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
 
-import android.content.ContentResolver;
-import android.database.Cursor;
-
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 
 public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsphinx.RecognitionListener, TextToSpeech.OnInitListener, MediaPlayerControl {
 
+
+
+    private static final int PRIMERA_ACTIVIDAD = 1;
+    private static final int SEGUNDA_ACTIVIDAD = 2;
 
     private SpeechRecognizer recognizer;
     private static final String KEYPHRASE = "hola viki";
@@ -83,20 +99,23 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     public boolean dentroSpoty;
     public boolean conectado;
 
+    private WritableCellFormat times;
+
     //debemos almacenar para mostrar en la lista, el nombre de la play list que esté en la config de usuario
     //TODO: los datos mejor en base de datos ¿?? //
-    String tituloPlayList[] = {"FIREHOUSE", "BBKING"};
-    String Playlist[] = {"playlist:1X7lWdHqmPajeBECHtSVD3","playlist:0nSQ0Uaw66rJ3vZy9MUomB"};
+    String tituloPlayList[] = {"MIX","FIREHOUSE", "BBKING","STORMZONE","TWILIGHT"};
+    String Playlist[] = {"playlist:7yx0NvUy0Gb6RwtKpmSdsf","playlist:1X7lWdHqmPajeBECHtSVD3","playlist:0nSQ0Uaw66rJ3vZy9MUomB","playlist:3s3CnzaOU9DUjy173QSYoD","playlist:6kJ64fgKir1SVtslhhWcTO"};
     String Canciones[] = {};
     String Albumes[] = {"LOQUILLO","BBKING","LA LEYENDA DE LA MANCHA","GARY MOORE","STAYOZ","TOM JONES","WARCRY","DEBLER"};
     String Artistas[] = {};
 
     ArrayAdapter<String> adapter;
     ListView listaDispo;
-    Button playlist, canciones,album, artista;
+    Button playlist, canciones,album, artista,gastos,prueba;
     TableLayout spotifyTabla;
     MenuItem MusicaPlay, MusicaNext, MusicaStop,ocupado, libre;
     View PanelMusica;
+    TextView excel;
 
 
     private boolean spoty_playLists = false;
@@ -107,21 +126,51 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
     private boolean estadoVoz = false;
     public boolean whatsapp = true;
 
+    //conexión ftp variable //
+
+    private FTPconnect ftpconnect = null;
+    FileInputStream fis = null;
+    BufferedInputStream buffer;
+
+
     MailJob mail;
 
     /*variables dictado por voz */
     String telefonos;
     String textos;
 
+    /*
+    variable FTP
+     */
+    FTPClient ftpClient = new FTPClient();
 
     //TODO: NOTA--> BUSCAR PALABRA CLAVE EN LA REPRODUCCION DE LA MUSICA // -->
+
+
+
 
     @Override
     public void onCreate(Bundle state) {
 
         super.onCreate(state);
         setContentView(R.layout.activity_main);
-       
+
+        /*
+        Mostrar sobre otras aplicaciones...lleva a donde hay que dar permisos
+
+        // Check if Android M or higher
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            // Show alert dialog to the user saying a separate permission is needed
+            // Launch the settings activity if the user prefers
+            Intent myIntent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+            startActivity(myIntent);
+        }
+        */
+
+
+       //CreaExcel("Ejemplo gasto", 24); //Prueba de creacion de hoja de cálculo.//
+
+      //  subeftp();  //suble el excel al servidor ftp //
 
 
         if(whatsapp == true){
@@ -142,12 +191,16 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         libre = (MenuItem) findViewById(R.id.estadoVikiOn);
 
         listaDispo = (ListView) findViewById(R.id.lista);
+        prueba = (Button) findViewById(R.id.button55);
         playlist = (Button) findViewById(R.id.button8);
         canciones = (Button) findViewById(R.id.button7);
         album = (Button) findViewById(R.id.button10);
         artista = (Button) findViewById(R.id.button9);
+        gastos = (Button) findViewById(R.id.button4);
         spotifyTabla = (TableLayout) findViewById(R.id.TablaSpoty);
         PanelMusica = (View) findViewById(R.id.view);
+
+      //  excel = (TextView) findViewById(R.id.PruebaExcel);
 
 
         //listaDispo.setBackgroundColor(255);
@@ -162,10 +215,37 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         listaDispo.setVisibility(View.INVISIBLE);
 
 
+        prueba.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+            }
+
+        });
+
+
+                        /*
+        Abre activity de gastos Excel
+                        */
+
+       gastos.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+
+               Intent gastos = new Intent(getApplicationContext(), GatosExcel.class);
+               startActivity(gastos);
+               recognizer.stop();
+               finish();
+
+           }
+       });
+
+
 
                                     /*
         Prueba de acciones del boton-- whatsapp y encendido remoto
-                                    */
+*/
         final Button button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -184,28 +264,33 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
                     }
                 }).start();
 
-                                                                /*
-        todo: llamamos a metodos de prueba, como inicir el repriductor, cambiar de activity para dictar y enviar por whatsupp
+
+     ///   todo: llamamos a metodos de prueba, como inicir el repriductor, cambiar de activity para dictar y enviar por whatsupp
 
 
-                /*
-                Lista de telefonos
-                */
+
+         //       Lista de telefonos
+
                 whatsapp = true;
                 Intent telefonos = new Intent(getApplicationContext(), ListaTelefonos.class);
                 startActivity(telefonos);
                 recognizer.stop();
                 finish();
 
+                //esto se comenta //
                 /*
                 google maps
 
                 Intent telefonos = new Intent(getApplicationContext(), MapsActivity.class);
                 startActivity(telefonos);
-                */
+
+                //hasta aqui //
+*/
             }
 
         });
+
+
 
         final Button button2 = findViewById(R.id.button2);
         button2.setOnClickListener(new View.OnClickListener() {
@@ -232,6 +317,8 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
         });
 
 
+
+
         final Button button8 = findViewById(R.id.button8);
         button8.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -251,6 +338,25 @@ public class MainActivity extends AppCompatActivity implements edu.cmu.pocketsph
 
 
     }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent resultIntent) {
+        // Check which request we're responding to
+        if (requestCode ==  PRIMERA_ACTIVIDAD ) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                // The user picked a contact.
+                // The Intent's data Uri identifies which contact was selected.
+
+
+                showAlert();
+
+                // Do something with the contact here (bigger example below)
+            }
+        }
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -348,22 +454,26 @@ Llamada al archivo xml que contien el menu.superior.. si no dará error
         TODO: La lista de reproduccion se obtiene, sacando el enlace de spotyfy web. Así podremos agregar las listas que queramos.
                                  */
 
-        Intent intent = new Intent(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH);
+
+        //Intent intent = new Intent(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH);
 
         if(listaRepord = true){
-            intent.setData(Uri.parse("spotify:user:mentzal:" + url));
-        }
+            Intent intent = new Intent( MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH, Uri.parse("spotify:user:mentzal:"  + url));
+            //intent.setType(MediaStore.Audio.Media.CONTENT_TYPE); // Show user only contacts w/ phone numbers
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            // intent.setData(Uri.parse("spotify:user:mentzal:" + url));
+            startActivityForResult(intent, PRIMERA_ACTIVIDAD);
+        }
 
         try{
 
-            MainActivity.this.startActivity(intent);
+            //MainActivity.this.startActivity(intent);
+
         }catch (Exception e){
 
             showAlert();
         }
-
     }
 
             /*
@@ -769,6 +879,8 @@ private void runRecognizerSetup() {
        protected void onPostExecute(Exception result) {
            if (result != null) {
                System.out.println(result.getMessage() + "asincrono");
+
+
            } else {
                switchSearch(KWS_SEARCH);
            }
@@ -859,13 +971,19 @@ Accedemos al archivo de palabras según la palabra clave que digamos
         estadoVoz = false;
         switchSearch(MENU_SPOTY);
     }
+
    }
 
 }
+
+
+
+
+
+
     @Override
     public void onResult(Hypothesis hypothesis) {
 
-        boolean listalokillo = false;
 
         if (hypothesis != null) {
 
@@ -924,6 +1042,8 @@ Accedemos al archivo de palabras según la palabra clave que digamos
                   reproduce una cancion selecionada
                                  */
 
+
+
                 creaMusica();
 
                 // musica.gram = true;
@@ -941,19 +1061,6 @@ Accedemos al archivo de palabras según la palabra clave que digamos
                 recognizer.startListening(MENU_SEARCH);
             }
 
-            //todo: hacer lista dinámica...par amostrar unas canciones u otras ... sacar del oncreate //
-            else if (hypothesis.getHypstr().equals("música dance")) {
-
-                // mediaPlayer.stop();
-                creaMusica();
-                recognizer.stop();
-
-
-                //  lista.setVisibility(View.INVISIBLE);
-                recognizer.startListening(MENU_SEARCH);
-
-
-            }
 
             else if(hypothesis.getHypstr().equals("hola viki")){
                 textToSpeech.speak("hola", TextToSpeech.QUEUE_FLUSH, null, null);
@@ -968,6 +1075,8 @@ Accedemos al archivo de palabras según la palabra clave que digamos
         ENVIO DE CORREO DE PRUEBA
         En la cuenta de correo de gmail, permitir acceso a aplicaciones no seguras.
                 */
+
+
                 new MailJob("belaklord@gmail.com", "A968908054").execute(
                         new MailJob.Mail("belaklord@gmail.com", "belaklord@gmail.com", "subjeto", "contenido") );
 
@@ -1239,5 +1348,131 @@ Accedemos al archivo de palabras según la palabra clave que digamos
         whatsapp = false;
     }
 
-}
+                                        /*
+            Introduce en la excel gastos fijos y gastos variables en las celdas
+            Gatos variables columnas 2 y 3 --> los fijos celdas 0 y 1
 
+                todo: Falta implementarlo en el asistente de voz
+                                        */
+
+    public void CreaExcel(String motivo, int cantidad) {
+
+        File sdCard = Environment.getExternalStorageDirectory();
+        File directory = new File(sdCard.getAbsolutePath() + "/javatechig.todo");
+        File inputWorkbook = new File(directory + "/Gastos.xls");
+
+        Workbook w;
+
+        try {
+            w = Workbook.getWorkbook(inputWorkbook);
+
+            // Get the first sheet
+
+            Sheet sheet = w.getSheet(0);
+            WritableWorkbook wkr = Workbook.createWorkbook(inputWorkbook, w);
+            WritableSheet getsht = wkr.getSheet(0);
+
+
+
+            //todo: Obtener el numeto total de columnas y filas para insertar el nuevo dato
+
+            int contador = 0;
+
+            for (int j = 0; j < sheet.getRows(); j++) {
+
+                Cell celda = sheet.getCell(0,j); //obtenemos las celdas de la primera columna ("0")
+                Cell celda_2 = sheet.getCell(1,j); // obtenemos las celdas de la segunda columna  ("1")
+
+                System.out.println(celda.getContents());
+                System.out.println(celda_2.getContents());
+
+                            /*
+                Añade un nuevo gasto fijo
+                            */
+                if(celda.getContents()== ""  && contador == 0){
+                    contador ++;
+                    Label label = new Label(2, j, motivo); // título del gasto
+                    getsht.addCell(label);
+
+
+                    NumberFormat decimalNo = new NumberFormat("#.0");
+                    WritableCellFormat numberFormat = new WritableCellFormat(decimalNo);
+                    //write to datasheet
+                    Number numberCell = new Number(3, j, cantidad, numberFormat);  //Añade la celda del gasto fijo en modo número //
+                    getsht.addCell(numberCell);
+
+
+                    wkr.write();
+                    wkr.close();
+
+                    //todo: falta agregar una celda de prueba //
+
+                }
+
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (BiffException e) {
+            e.printStackTrace();
+        } catch (WriteException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void subeftp(){
+
+        ftpconnect = new FTPconnect();
+
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                //Comprubea el estado de la conexión ftp //
+                boolean status = false;
+                status = ftpconnect.ftpConnect("85.56.134.181", "belaklord", "a968908054", 21);
+                ftpconnect.ftpChangeDirectory("/gastos");
+
+                //fin de la comprbación del estado //
+
+
+                try {
+
+                    ftpClient.connect("85.56.134.181", 21);
+                    ftpClient.login("belaklord", "a968908054");
+                    File files = new File("/sdcard/javatechig.todo/Gastos.xls");
+                    buffer = new BufferedInputStream(new FileInputStream(files));
+                    ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+
+                    if (ftpClient.storeFile("Gastos.xls", buffer)){
+
+                        //Informa al usuario
+                       System.out.println("Se ha subid!!!!!o");
+
+                        buffer.close();        //Cierra el bufer
+
+                    }
+                    else{
+
+                        //Informa al usuario
+                        System.out.println("!!!!!nO Se ha subid!!!!!o");
+
+                        buffer.close();        //Cierra el bufer
+
+                    }
+
+                }catch(Exception e){
+
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(),"No se ha podido conectar con el servidor FTP", Toast.LENGTH_LONG).show();
+                }
+            }
+        }).start();
+
+
+    }
+
+    }

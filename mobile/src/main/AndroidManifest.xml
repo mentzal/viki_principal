@@ -21,6 +21,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -37,22 +38,35 @@
         android:theme="@style/AppTheme"
         android:windowSoftInputMode="stateHidden">
         <activity android:name=".MainActivity"
+
+
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/VikiThemme">
-
             <!-- Se añaden estas dos líneas para ponerla como clase principal¡ -->
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
-        <activity android:name=".SpotifyClas" />
+        <activity android:name=".SpotifyClas">
+
+
+    </activity>
         <activity
             android:name=".ListaTelefonos"
             android:windowSoftInputMode="stateHidden"
             android:configChanges="orientation|keyboardHidden"
             android:theme="@style/VikiThemme" />
+
+        <activity
+            android:name=".GatosExcel"
+            android:theme="@style/VikiThemme"
+            android:windowSoftInputMode="stateHidden"
+
+           />
 
         <meta-data
             android:name="com.google.android.gms.car.application"

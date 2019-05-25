@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:background="@color/FONDO"
         tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="416dp">
+        tools:layout_editor_absoluteY="16dp">
 
 
         <TableLayout
@@ -86,12 +86,26 @@
             tools:layout_editor_absoluteY="0dp" />
 
         <Button
+            android:id="@+id/button4"
+            style="@android:style/Widget.Material.Button.Colored"
+            android:layout_width="102dp"
+            android:layout_height="58dp"
+            android:layout_alignStart="@+id/TablaSpoty"
+            android:layout_alignTop="@+id/view"
+            android:layout_marginStart="105dp"
+            android:layout_marginTop="-60dp"
+            android:background="@color/Fondolista"
+            android:text="Gastos"
+            tools:layout_editor_absoluteX="210dp"
+            tools:layout_editor_absoluteY="0dp" />
+
+        <Button
             android:id="@+id/button2"
             style="@android:style/Widget.Material.Button.Colored"
             android:layout_width="102dp"
             android:layout_height="58dp"
-            android:layout_alignEnd="@+id/TablaSpoty"
             android:layout_alignTop="@+id/button"
+            android:layout_alignEnd="@+id/TablaSpoty"
             android:background="#db63c975"
             android:text="Spotify"
             tools:layout_editor_absoluteX="210dp"
@@ -106,6 +120,19 @@
             android:layout_centerHorizontal="true"
             android:background="@color/Musica"
             android:text="Musica"
+            tools:layout_editor_absoluteX="210dp"
+            tools:layout_editor_absoluteY="0dp" />
+
+
+        <Button
+            android:id="@+id/button55"
+            style="@android:style/Widget.Material.Button.Colored"
+            android:layout_width="102dp"
+            android:layout_height="58dp"
+            android:layout_alignTop="@+id/button"
+            android:layout_marginTop="-61dp"
+            android:background="@color/Musica"
+            android:text="Prueba"
             tools:layout_editor_absoluteX="210dp"
             tools:layout_editor_absoluteY="0dp" />
 

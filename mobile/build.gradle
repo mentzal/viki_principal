@@ -17,6 +17,24 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/mimetypes.default'
+        exclude 'META-INF/mailcap.default'
+    }
 }
 
 dependencies {
@@ -49,13 +67,12 @@ dependencies {
     implementation 'com.sun.mail:android-mail:1.5.5'
     implementation 'com.sun.mail:android-activation:1.5.5'
     implementation 'pl.bclogic:pulsator4droid:1.0.3'
-    implementation files('libs/poi-4.0.1.jar')
-    implementation files('libs/poi-examples-4.0.1.jar')
-    implementation files('libs/poi-excelant-4.0.1.jar')
-    implementation files('libs/poi-ooxml-4.0.1.jar')
-    implementation files('libs/poi-ooxml-schemas-4.0.1.jar')
-    implementation files('libs/poi-scratchpad-4.0.1.jar')
+    implementation files('libs/ftp4j-1.7.2.jar')
+    implementation files('libs/commons-net-3.6.jar')
+    implementation 'com.android.support:gridlayout-v7:27.1.1'
+
 }
+
 
 repositories {
     mavenCentral()

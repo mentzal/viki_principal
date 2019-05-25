@@ -1,2 +1,2 @@
-include ':mobile', ':wear', ':things', ':mail', ':mylibrary', ':pulsator4droid', ':CSharpJExcel', ':poi-4.0.1'
+include ':mobile', ':wear', ':things', ':mail', ':mylibrary', ':pulsator4droid', ':spotify-app-remote-release-0.6.1'
 include ':app', ':pocketsphinx-android-5prealpha-release'

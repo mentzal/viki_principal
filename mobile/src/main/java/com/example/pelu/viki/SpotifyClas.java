@@ -50,6 +50,7 @@ public class SpotifyClas extends Activity implements SpotifyPlayer.NotificationC
         //Atennticación para utilizar spotyfy//
 
         // The only thing that's different is we added the 5 lines below.
+
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
         builder.setScopes(new String[]{"user-read-private", "streaming"});
         AuthenticationRequest request = builder.build();

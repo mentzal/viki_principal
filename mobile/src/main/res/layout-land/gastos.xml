@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/FONDO"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="48dp" />
+
+            <EditText
+                android:id="@+id/titulo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:text="Título"
+                android:textAlignment="center"
+                android:textColor="@color/browser_actions_bg_grey"
+                android:textColorLink="@color/Musica"
+                tools:layout_editor_absoluteX="0dp"
+                tools:layout_editor_absoluteY="107dp" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="48dp" />
+
+            <EditText
+                android:id="@+id/importe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="number"
+                android:text="Importe"
+                android:textAlignment="center"
+                android:textColor="@color/browser_actions_bg_grey"
+                android:textColorLink="@color/Musica" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="39dp" />
+
+            <Button
+                android:id="@+id/guardar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/barratareas"
+                android:text="Guardar"
+                tools:layout_editor_absoluteX="161dp"
+                tools:layout_editor_absoluteY="581dp" />
+        </LinearLayout>
+    </ScrollView>
+
+</android.support.constraint.ConstraintLayout>
